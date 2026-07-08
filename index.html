@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Aplikasi manajemen database akun untuk IPO - Kelola modal transfer, pesanan lot, penjatahan, sisa uang refund, dan keuntungan dari nominee.">
+  <title>IPO Account Hub - Database Portofolio Akun</title>
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css?v=1.1">
+  
+  <!-- Mobile Home Screen (Add to Home Screen) Icons & Settings -->
+  <link rel="icon" type="image/png" href="Logo IPO Tracker.png">
+  <link rel="apple-touch-icon" href="Logo IPO Tracker.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="IPO Tracker">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#101524">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- Error overlay for debugging hosted environment -->
+  <script>
+    window.addEventListener('error', function(e) {
+      const errDiv = document.createElement('div');
+      errDiv.style.position = 'fixed';
+      errDiv.style.top = '0';
+      errDiv.style.left = '0';
+      errDiv.style.width = '100%';
+      errDiv.style.background = 'rgba(220, 38, 38, 0.95)';
+      errDiv.style.color = '#ffffff';
+      errDiv.style.padding = '12px';
+      errDiv.style.zIndex = '999999';
+      errDiv.style.fontSize = '12px';
+      errDiv.style.fontFamily = 'monospace';
+      errDiv.style.whiteSpace = 'pre-wrap';
+      errDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
+      errDiv.innerHTML = '<strong>Aplikasi Error (JS):</strong> ' + e.message + '<br><span style="opacity:0.8;">Berkas: ' + e.filename + ' | Baris: ' + e.lineno + '</span>';
+      document.body.appendChild(errDiv);
+    });
+  </script>
+
+  <div class="ambient-glow-1"></div>
+  <div class="ambient-glow-2"></div>
+
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="logo-container">
+        <div class="logo-icon">IP</div>
+        <span class="logo-text">IPO HUB</span>
+      </div>
+      <ul class="nav-links">
+        <li>
+          <a class="nav-item active" data-tab="dashboard" id="nav-dashboard">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span class="nav-text">Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="nominees" id="nav-nominees">
+            <i class="fa-solid fa-users"></i>
+            <span class="nav-text">Database Akun</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="stocks" id="nav-stocks">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+            <span class="nav-text">Saham IPO</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="orders" id="nav-orders">
+            <i class="fa-solid fa-receipt"></i>
+            <span class="nav-text">Pesanan Saham</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="transactions" id="nav-transactions">
+            <i class="fa-solid fa-money-bill-transfer"></i>
+            <span class="nav-text">Log Keuangan</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="debts" id="nav-debts">
+            <i class="fa-solid fa-hand-holding-dollar"></i>
+            <span class="nav-text">Manajemen Hutang</span>
+          </a>
+        </li>
+      </ul>
+      <div class="sidebar-footer">
+        <p>IPO Account Hub v1.0</p>
+        <p>© 2026 Antigravity System</p>
+      </div>
+    </aside>
+
+    <!-- Main Content Panel -->
+    <main class="main-content">
+      <!-- Top header bar -->
+      <header class="top-header">
+        <div class="header-title">
+          <h1 id="page-title">Ringkasan Portofolio</h1>
+          <p id="page-subtitle">Selamat datang kembali! Berikut adalah statistik agregat akun IPO Anda.</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" id="btn-seed-data" title="Muat Data Demo untuk Demo">
+            <i class="fa-solid fa-database"></i> Data Demo
+          </button>
+          <button class="btn btn-secondary" id="btn-export-db">
+            <i class="fa-solid fa-download"></i> Ekspor Backup
+          </button>
+          <button class="btn btn-secondary" id="btn-import-db">
+            <i class="fa-solid fa-upload"></i> Impor Backup
+          </button>
+        </div>
+      </header>
+
+      <!-- ================= TAB: DASHBOARD ================= -->
+      <section id="tab-dashboard" class="tab-content active">
+        <!-- KPI Cards Grid -->
+        <div class="kpi-grid">
+          <div class="glass-card kpi-card" style="--accent: var(--info); --accent-glow: rgba(59, 130, 246, 0.15);">
+            <div class="kpi-header">
+              <span>Total Modal Ditransfer</span>
+              <div class="kpi-icon"><i class="fa-solid fa-paper-plane"></i></div>
+            </div>
+            <div class="kpi-value" id="kpi-total-transferred">Rp 0</div>
+            <div class="kpi-subtext" id="kpi-total-returned-sub">Sudah dikembalikan: Rp 0</div>
+          </div>
+
+          <div class="glass-card kpi-card" style="--accent: var(--success); --accent-glow: var(--success-glow);">
+            <div class="kpi-header">
+              <span>Total Keuntungan Bersih</span>
+              <div class="kpi-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+            </div>
+            <div class="kpi-value text-profit" id="kpi-total-profit">Rp 0</div>
+            <div class="kpi-subtext" id="kpi-profit-pct">Bagi Hasil: Rp 0 | ROI: 0%</div>
+          </div>
+
+          <div class="glass-card kpi-card" style="--accent: var(--warning); --accent-glow: var(--warning-glow);">
+            <div class="kpi-header">
+              <span>Sisa Uang Di Nominee</span>
+              <div class="kpi-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+            </div>
+            <div class="kpi-value text-outstanding" id="kpi-total-outstanding">Rp 0</div>
+            <div class="kpi-subtext" id="kpi-cash-vs-stock">RDN Cash: Rp 0 | Saham: Rp 0</div>
+          </div>
+
+          <div class="glass-card kpi-card" style="--accent: var(--danger); --accent-glow: var(--danger-glow);">
+            <div class="kpi-header">
+              <span>Sisa Hutang Saya</span>
+              <div class="kpi-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+            </div>
+            <div class="kpi-value text-loss" id="kpi-total-debt-remaining">Rp 0</div>
+            <div class="kpi-subtext" id="kpi-debt-details">Pinjaman: Rp 0 | Terbayar: Rp 0</div>
+          </div>
+
+          <div class="glass-card kpi-card" style="--accent: var(--secondary); --accent-glow: var(--secondary-glow);">
+            <div class="kpi-header">
+              <span>Rincian Hub</span>
+              <div class="kpi-icon"><i class="fa-solid fa-network-wired"></i></div>
+            </div>
+            <div class="kpi-value" id="kpi-counts">0 Akun</div>
+            <div class="kpi-subtext" id="kpi-counts-sub">0 Saham | 0 Pesanan Aktif</div>
+          </div>
+        </div>
+
+        <!-- Charts and Breakdown -->
+        <div class="analytics-grid">
+          <!-- Profit chart per stock -->
+          <div class="glass-card">
+            <div class="section-header">
+              <h2 class="section-title"><i class="fa-solid fa-chart-bar text-profit"></i> Keuntungan Per Saham IPO</h2>
+            </div>
+            <div style="height: 300px; position: relative;">
+              <canvas id="chart-stock-profits"></canvas>
+            </div>
+          </div>
+
+          <!-- Nominee outstanding list -->
+          <div class="glass-card">
+            <div class="section-header">
+              <h2 class="section-title"><i class="fa-solid fa-wallet text-outstanding"></i> Tagihan per Akun</h2>
+            </div>
+            <div class="table-container">
+              <table id="table-dashboard-nominees">
+                <thead>
+                  <tr>
+                    <th>Nama Akun</th>
+                    <th class="text-right">Sisa Tagihan</th>
+                  </tr>
+                </thead>
+                <tbody id="list-dashboard-nominees">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent transactions -->
+        <div class="glass-card">
+          <div class="section-header">
+            <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Aktivitas Log Keuangan Terkini</h2>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Nama Akun</th>
+                  <th>Tipe</th>
+                  <th class="text-right">Jumlah</th>
+                  <th>Keterangan</th>
+                </tr>
+              </thead>
+              <tbody id="list-dashboard-transfers">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: NOMINEES ================= -->
+      <section id="tab-nominees" class="tab-content">
+        <div class="section-header">
+          <div class="filter-bar">
+            <div class="search-input-wrapper">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="search-nominee" placeholder="Cari nama akun atau bank...">
+            </div>
+          </div>
+          <button class="btn btn-primary" id="btn-add-nominee">
+            <i class="fa-solid fa-user-plus"></i> Tambah Akun Baru
+          </button>
+        </div>
+
+        <!-- Grid Cards of Nominees -->
+        <div class="nominee-grid" id="grid-nominees">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- ================= TAB: STOCKS ================= -->
+      <section id="tab-stocks" class="tab-content">
+        <div class="section-header">
+          <div class="filter-bar">
+            <div class="search-input-wrapper">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="search-stock" placeholder="Cari kode atau nama saham...">
+            </div>
+            <select class="filter-select" id="filter-stock-status">
+              <option value="all">Semua Status</option>
+              <option value="active">Bookbuilding/Offering</option>
+              <option value="allotted">Penjatahan Selesai</option>
+              <option value="listed">Tercatat (Trading)</option>
+              <option value="closed">Selesai</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="btn-add-stock">
+            <i class="fa-solid fa-circle-plus"></i> Tambah Saham IPO
+          </button>
+        </div>
+
+        <div class="glass-card">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Kode</th>
+                  <th>Nama Perusahaan</th>
+                  <th class="text-right">Harga IPO (lbr)</th>
+                  <th>Tgl Listing</th>
+                  <th>Status</th>
+                  <th class="text-right">Total Pesanan (Lot)</th>
+                  <th class="text-right">Total Keuntungan</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="list-stocks">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: ORDERS ================= -->
+      <section id="tab-orders" class="tab-content">
+        <div class="section-header">
+          <div class="filter-bar">
+            <div class="search-input-wrapper">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="search-order" placeholder="Cari akun atau saham...">
+            </div>
+            <select class="filter-select" id="filter-order-status">
+              <option value="all">Semua Status</option>
+              <option value="ordered">Dipesan (Locked)</option>
+              <option value="allotted">Dapat Penjatahan (Unsold)</option>
+              <option value="sold">Sudah Dijual (Closed)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="btn-add-order">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Buat Pesanan Baru
+          </button>
+        </div>
+
+        <div class="glass-card">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Akun Nominee</th>
+                  <th>Saham</th>
+                  <th class="text-right">Pesanan (Lot)</th>
+                  <th class="text-right">Dana Dipesan</th>
+                  <th class="text-right">Penjatahan (Lot)</th>
+                  <th class="text-right">Refund (Sisa Lot)</th>
+                  <th class="text-right">Harga Jual (lbr)</th>
+                  <th class="text-right">Keuntungan</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="list-orders">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: TRANSACTIONS ================= -->
+      <section id="tab-transactions" class="tab-content">
+        <div class="section-header">
+          <div class="filter-bar">
+            <div class="search-input-wrapper">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="search-transaction" placeholder="Cari akun atau catatan...">
+            </div>
+            <select class="filter-select" id="filter-transaction-type">
+              <option value="all">Semua Jenis Transaksi</option>
+              <option value="transfer">Transfer Modal (Ke Akun)</option>
+              <option value="return">Pengembalian Uang (Ke Saya)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="btn-add-transaction">
+            <i class="fa-solid fa-plus-minus"></i> Tambah Transaksi Keuangan
+          </button>
+        </div>
+
+        <div class="glass-card">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Akun Nominee</th>
+                  <th>Jenis</th>
+                  <th class="text-right">Jumlah Uang</th>
+                  <th>Keterangan</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="list-transactions">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: DEBTS ================= -->
+      <section id="tab-debts" class="tab-content">
+        <div class="section-header">
+          <div class="filter-bar">
+            <div class="search-input-wrapper">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="search-debt" placeholder="Cari nama kreditur atau catatan...">
+            </div>
+          </div>
+          <button class="btn btn-primary" id="btn-add-debt">
+            <i class="fa-solid fa-circle-plus"></i> Tambah Hutang Baru
+          </button>
+        </div>
+
+        <div class="glass-card">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tanggal Pinjam</th>
+                  <th>Pemberi Pinjaman (Kreditur)</th>
+                  <th class="text-right">Jumlah Pinjaman</th>
+                  <th class="text-right">Telah Dibayar</th>
+                  <th class="text-right">Sisa Hutang</th>
+                  <th>Status</th>
+                  <th>Keterangan</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="list-debts">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ================= MODALS SECTION ================= -->
+  
+  <!-- Nominee Add/Edit Modal -->
+  <div class="modal-backdrop" id="modal-nominee">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="nominee-modal-title">Tambah Akun Baru</h2>
+        <button class="modal-close" data-close="modal-nominee">&times;</button>
+      </div>
+      <form id="form-nominee">
+        <input type="hidden" id="nominee-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="nominee-name">Nama Pemilik Akun</label>
+            <input type="text" id="nominee-name" required placeholder="Contoh: Budi Santoso">
+          </div>
+          <div class="form-group">
+            <label for="nominee-phone">No Telepon / WhatsApp</label>
+            <input type="text" id="nominee-phone" placeholder="Contoh: 0812xxxxxx">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nominee-bank-name">Nama Bank RDN</label>
+              <input type="text" id="nominee-bank-name" placeholder="Contoh: BCA / Mandiri">
+            </div>
+            <div class="form-group">
+              <label for="nominee-bank-acc">Nomor Rekening RDN</label>
+              <input type="text" id="nominee-bank-acc" placeholder="Contoh: 887201xxxx">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="nominee-profit-share-pct">Bagi Hasil Nominee (%)</label>
+            <input type="number" id="nominee-profit-share-pct" min="0" max="100" step="any" placeholder="Contoh: 10 (Artinya 10% keuntungan untuk nominee)">
+          </div>
+          <div class="form-group">
+            <label for="nominee-notes">Catatan Tambahan</label>
+            <textarea id="nominee-notes" placeholder="Catatan khusus, e.g. Hubungan keluarga/Teman kerja"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="modal-nominee">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-nominee">Simpan Akun</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Stock Add/Edit Modal -->
+  <div class="modal-backdrop" id="modal-stock">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="stock-modal-title">Tambah Saham IPO</h2>
+        <button class="modal-close" data-close="modal-stock">&times;</button>
+      </div>
+      <form id="form-stock">
+        <input type="hidden" id="stock-id">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="stock-code">Kode Saham (Ticker)</label>
+              <input type="text" id="stock-code" required placeholder="Contoh: ADRO" maxlength="5">
+            </div>
+            <div class="form-group">
+              <label for="stock-name">Nama Perusahaan</label>
+              <input type="text" id="stock-name" required placeholder="Contoh: Adaro Energy Tbk">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="stock-price">Harga IPO per Lembar (Rp)</label>
+            <input type="number" id="stock-price" required placeholder="Contoh: 1000" min="1">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="stock-offering-date">Tgl Penawaran</label>
+              <input type="date" id="stock-offering-date">
+            </div>
+            <div class="form-group">
+              <label for="stock-listing-date">Tgl Listing Bursa</label>
+              <input type="date" id="stock-listing-date">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="stock-status">Status IPO</label>
+            <select id="stock-status">
+              <option value="active">Bookbuilding/Offering</option>
+              <option value="allotted">Penjatahan Selesai (Allocated)</option>
+              <option value="listed">Tercatat di Bursa (Trading)</option>
+              <option value="closed">Selesai (Closed)</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="modal-stock">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-stock">Simpan Saham</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Order Add/Edit Modal -->
+  <div class="modal-backdrop" id="modal-order">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="order-modal-title">Buat Pesanan IPO Baru</h2>
+        <button class="modal-close" data-close="modal-order">&times;</button>
+      </div>
+      <form id="form-order">
+        <input type="hidden" id="order-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="order-nominee">Pilih Akun Nominee</label>
+            <select id="order-nominee" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="order-stock">Pilih Saham IPO</label>
+            <select id="order-stock" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="order-lot">Jumlah Lot Pesanan</label>
+            <input type="number" id="order-lot" required placeholder="Contoh: 100" min="1">
+            <span class="kpi-subtext mt-2" id="order-est-value">Estimasi Kebutuhan Dana: Rp 0</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="modal-order">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-order">Simpan Pesanan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Allotment Input Modal -->
+  <div class="modal-backdrop" id="modal-allotment">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Input Penjatahan IPO</h2>
+        <button class="modal-close" data-close="modal-allotment">&times;</button>
+      </div>
+      <form id="form-allotment">
+        <input type="hidden" id="allotment-order-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <p id="allotment-info" style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;"></p>
+          </div>
+          <div class="form-group">
+            <label for="allotment-lot">Jumlah Lot Yang Didapatkan</label>
+            <input type="number" id="allotment-lot" required placeholder="Contoh: 5" min="0">
+            <span class="kpi-subtext mt-2" id="allotment-refund-value" style="color: var(--success);">Estimasi Sisa Uang Refund: Rp 0</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="modal-allotment">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Penjatahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Sell Input Modal -->
+  <div class="modal-backdrop" id="modal-sell">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Catat Penjualan Saham</h2>
+        <button class="modal-close" data-close="modal-sell">&times;</button>
+      </div>
+      <form id="form-sell">
+        <input type="hidden" id="sell-order-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <p id="sell-info" style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;"></p>
+          </div>
+          <div class="form-group">
+            <label for="sell-price">Harga Jual Per Lembar (Rp)</label>
+            <input type="number" id="sell-price" required placeholder="Contoh: 1200" min="1">
+            <span class="kpi-subtext mt-2" id="sell-profit-value">Estimasi Keuntungan/Kerugian: Rp 0</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="modal-sell">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Hasil Jual</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Transaction Add/Edit Modal -->
+  <div class="modal-backdrop" id="modal-transaction">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="transaction-modal-title">Catat Transaksi Keuangan</h2>
+        <button class="modal-close" data-close="modal-transaction">&times;</button>
+      </div>
+      <form id="form-transaction">
+        <input type="hidden" id="transaction-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="transaction-nominee">Akun Nominee</label>
+            <select id="transaction-nominee" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="transaction-type">Jenis Transaksi</label>
+              <select id="transaction-type" required>
+                <option value="transfer">Transfer Modal (Saya Kirim Uang)</option>
+                <option value="return">Pengembalian Dana (Nominee Kirim Balik)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="transaction-date">Tanggal</label>
+              <input type="date" id="transaction-date" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="transaction-amount">Jumlah Dana (Rp)</label>
+            <input type="number" id="transaction-amount" required placeholder="Contoh: 5000000" min="1">
+          </div>
+          <div class="form-group">
+            <label for="transaction-notes">Keterangan / Catatan</label>
+            <input type="text" id="transaction-notes" placeholder="Contoh: Refund sisa ADRO / Modal GOTO">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="modal-transaction">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-transaction">Simpan Transaksi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Debt Add/Edit Modal -->
+  <div class="modal-backdrop" id="modal-debt">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="debt-modal-title">Catat Hutang Baru</h2>
+        <button class="modal-close" data-close="modal-debt">&times;</button>
+      </div>
+      <form id="form-debt">
+        <input type="hidden" id="debt-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="debt-creditor">Pemberi Pinjaman (Kreditur)</label>
+            <input type="text" id="debt-creditor" required placeholder="Contoh: Hendra Wijaya">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="debt-date">Tanggal Pinjam</label>
+              <input type="date" id="debt-date" required>
+            </div>
+            <div class="form-group">
+              <label for="debt-amount">Jumlah Pinjaman (Rp)</label>
+              <input type="number" id="debt-amount" required placeholder="Contoh: 10000000" min="1">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="debt-paid">Jumlah Telah Dibayar (Rp)</label>
+            <input type="number" id="debt-paid" required placeholder="Contoh: 0" min="0">
+            <span class="kpi-subtext mt-2" id="debt-remaining-est" style="color: var(--warning);">Estimasi Sisa Hutang: Rp 0</span>
+          </div>
+          <div class="form-group">
+            <label for="debt-notes">Catatan / Keterangan</label>
+            <input type="text" id="debt-notes" placeholder="Contoh: Pinjaman modal IPO ADRO">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="modal-debt">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-debt">Simpan Data Hutang</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Nominee Detail Modal -->
+  <div class="modal-backdrop" id="modal-nominee-detail">
+    <div class="modal" style="max-width: 700px;">
+      <div class="modal-header">
+        <h2 id="detail-nominee-name">Nama Nominee</h2>
+        <button class="modal-close" data-close="modal-nominee-detail">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-grid">
+          <div class="detail-block">
+            <div class="detail-label">Total Dana Ditransfer (A)</div>
+            <div class="detail-val" id="detail-total-transferred">Rp 0</div>
+          </div>
+          <div class="detail-block">
+            <div class="detail-label">Total Dana Dikembalikan (B)</div>
+            <div class="detail-val text-profit" id="detail-total-returned">Rp 0</div>
+          </div>
+          <div class="detail-block">
+            <div class="detail-label">Total Keuntungan Saham (C)</div>
+            <div class="detail-val text-profit" id="detail-total-profit">Rp 0</div>
+          </div>
+          <div class="detail-block">
+            <div class="detail-label">Bagi Hasil Nominee (D) <span id="detail-profit-share-pct-label">(0%)</span></div>
+            <div class="detail-val text-loss" id="detail-profit-share-amount">Rp 0</div>
+          </div>
+          <div class="detail-block">
+            <div class="detail-label">Keuntungan Bersih Saya (E = C - D)</div>
+            <div class="detail-val text-profit" id="detail-user-net-profit">Rp 0</div>
+          </div>
+          <div class="detail-block" style="border-color: var(--warning);">
+            <div class="detail-label">Sisa Tagihan (A + E - B)</div>
+            <div class="detail-val text-outstanding" id="detail-outstanding-balance">Rp 0</div>
+          </div>
+        </div>
+
+        <div class="detail-block" style="margin-bottom: 1.5rem; background: rgba(0, 242, 254, 0.03);">
+          <div style="display: flex; justify-content: space-between;">
+            <div>
+              <div class="detail-label">Dana Menganggur di RDN (Refund + Sisa Modal)</div>
+              <div class="detail-val" id="detail-liquid-cash" style="color: var(--primary);">Rp 0</div>
+            </div>
+            <div class="text-right">
+              <div class="detail-label">Modal Terkunci di Saham Unsold</div>
+              <div class="detail-val" id="detail-active-unsold" style="color: var(--secondary);">Rp 0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <h3 class="section-title mt-4" style="font-size: 1rem;"><i class="fa-solid fa-receipt text-primary"></i> Daftar Saham yang Diikuti</h3>
+          <div class="table-container mt-2">
+            <table>
+              <thead>
+                <tr>
+                  <th>Saham</th>
+                  <th class="text-right">Pesanan (Lot)</th>
+                  <th class="text-right">Dapat (Lot)</th>
+                  <th class="text-right">Refund</th>
+                  <th class="text-right">Keuntungan</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="detail-nominee-orders">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close="modal-nominee-detail">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DB Import Backup Modal -->
+  <div class="modal-backdrop" id="modal-import">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Impor Database Backup</h2>
+        <button class="modal-close" data-close="modal-import">&times;</button>
+      </div>
+      <form id="form-import">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="import-json-data">Tempel Kode Backup JSON</label>
+            <textarea id="import-json-data" style="min-height: 250px; font-family: monospace; font-size: 0.8rem;" required placeholder='Tempelkan string JSON hasil ekspor di sini...'></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="modal-import">Batal</button>
+          <button type="submit" class="btn btn-primary">Impor Data</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Application Logic Scripts -->
+  <script src="js/db.js?v=1.1"></script>
+  <script src="js/app.js?v=1.1"></script>
+  <script>
+    if (typeof db === 'undefined' || typeof refreshAll === 'undefined') {
+      const errDiv = document.createElement('div');
+      errDiv.style.position = 'fixed';
+      errDiv.style.top = '0';
+      errDiv.style.left = '0';
+      errDiv.style.width = '100%';
+      errDiv.style.background = 'rgba(220, 38, 38, 0.95)';
+      errDiv.style.color = '#ffffff';
+      errDiv.style.padding = '12px';
+      errDiv.style.zIndex = '999999';
+      errDiv.style.fontSize = '14px';
+      errDiv.style.fontFamily = 'sans-serif';
+      errDiv.style.textAlign = 'center';
+      errDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
+      errDiv.innerHTML = '<strong>PENTING:</strong> Berkas logika (<code>js/db.js</code> atau <code>js/app.js</code>) gagal dimuat! Pastikan folder <code>js</code> beserta isinya sudah diunggah ke hosting Anda di tempat yang benar.';
+      document.body.appendChild(errDiv);
+    }
+  </script>
+</body>
+</html>
