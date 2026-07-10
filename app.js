@@ -80,6 +80,8 @@ function initAllCurrencyInputs() {
 // Global Variables
 let currentTab = 'dashboard';
 let profitChart = null;
+let isSigningIn = false;
+let syncPollInterval = null;
 
 // App initialization function
 function initApp() {
@@ -1976,8 +1978,6 @@ function showCustomConfirm(message, confirmTitle) {
 }
 
 // ----------------- GOOGLE DRIVE SYNC HANDLERS -----------------
-let isSigningIn = false;
-let syncPollInterval = null;
 
 function startGoogleSyncPolling() {
   if (typeof googleSync === 'undefined') return;
