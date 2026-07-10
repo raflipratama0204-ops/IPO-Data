@@ -79,7 +79,7 @@
 
   // Initialize the Token Client
   function init(callback) {
-    const clientId = localStorage.getItem(CLIENT_ID_KEY);
+    const clientId = getClientId();
     if (!clientId) {
       if (callback) callback({ initialized: false });
       return;
@@ -136,7 +136,7 @@
 
   // Request Access Token / Login
   function connect() {
-    const clientId = localStorage.getItem(CLIENT_ID_KEY);
+    const clientId = getClientId();
     if (!clientId) {
       alert('Silakan masukkan Google Client ID terlebih dahulu di menu pengaturan.');
       return;
@@ -183,7 +183,7 @@
       }
 
       if (!tokenClient) {
-        const clientId = localStorage.getItem(CLIENT_ID_KEY);
+        const clientId = getClientId();
         if (!clientId) {
           reject(new Error('Google Client ID belum diatur.'));
           return;
@@ -371,7 +371,7 @@
   }
 
   function getClientId() {
-    return localStorage.getItem(CLIENT_ID_KEY) || '';
+    return localStorage.getItem(CLIENT_ID_KEY) || '409883088386-ar3ej7spjkl2t0hglmopa9fotejh1nt6.apps.googleusercontent.com';
   }
 
   function saveClientId(id) {
