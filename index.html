@@ -7,7 +7,7 @@
   <title>IPO Account Hub - Database Portofolio Akun</title>
   <!-- Google Fonts & FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css?v=2.4">
+  <link rel="stylesheet" href="styles.css?v=2.5">
   
   <!-- Mobile Home Screen (Add to Home Screen) Icons & Settings -->
   <link rel="icon" type="image/png" href="Logo IPO Tracker.png">
@@ -143,9 +143,9 @@
           </a>
         </li>
         <li>
-          <a class="nav-item" data-tab="cloud" id="nav-cloud">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
-            <span class="nav-text">Sinkronisasi Cloud</span>
+          <a class="nav-item" data-tab="settings" id="nav-settings">
+            <i class="fa-solid fa-gear"></i>
+            <span class="nav-text">Pengaturan</span>
           </a>
         </li>
       </ul>
@@ -472,79 +472,140 @@
         </div>
       </section>
 
-      <!-- ================= TAB: CLOUD ================= -->
-      <section id="tab-cloud" class="tab-content">
-        <div class="glass-card" style="max-width: 700px; margin: 0 auto; --accent: var(--primary); --accent-glow: rgba(0, 242, 254, 0.15);">
-          <div class="section-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 1.25rem; margin-bottom: 1.5rem;">
-            <h2 class="section-title" style="margin: 0;"><i class="fa-solid fa-cloud-arrow-up text-primary"></i> Sinkronisasi Cloud Google Drive</h2>
+      <!-- ================= TAB: SETTINGS ================= -->
+      <section id="tab-settings" class="tab-content">
+        <div class="glass-card" style="max-width: 800px; margin: 0 auto;">
+          <div class="section-header" style="border-bottom: 1px solid var(--glass-border); padding-bottom: 1.25rem; margin-bottom: 1.5rem;">
+            <h2 class="section-title" style="margin: 0;" id="settings-title"><i class="fa-solid fa-gear text-primary"></i> Pengaturan Aplikasi</h2>
           </div>
 
-          <!-- Connection Status Card -->
-          <div class="glass-card" id="google-status-card" style="background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.1); margin-bottom: 1.5rem; padding: 1.25rem;">
-            <div id="google-disconnected-state" style="text-align: center; padding: 1rem 0;">
-              <i class="fa-solid fa-cloud-slash" style="font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem; display: block;"></i>
-              <p style="font-weight: 600; font-size: 1.05rem; margin-bottom: 0.5rem;">Belum Terhubung ke Google Drive</p>
-              <p class="kpi-subtext" style="margin-bottom: 1.25rem;">Klik tombol di bawah untuk masuk menggunakan akun Google Anda dan mulai sinkronisasi otomatis.</p>
-              <button class="btn btn-primary" id="btn-google-connect">
-                <i class="fa-brands fa-google"></i> Hubungkan Akun Google
+          <!-- Group 1: Tampilan & Preferensi -->
+          <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1rem; font-family: var(--font-title); margin-bottom: 1.25rem; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; text-transform: uppercase; font-weight: 700;" id="settings-pref-title">
+              <i class="fa-solid fa-palette"></i> Preferensi Tampilan & Bahasa
+            </h3>
+            
+            <div class="form-row" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem;">
+              <!-- Theme Selection -->
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="settings-theme" style="font-size: 0.85rem;" id="settings-theme-label">Tema Tampilan</label>
+                <select id="settings-theme" class="filter-select" style="margin-top: 0.5rem; width: 100%; display: block; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border); color: var(--text-primary); padding: 0.5rem; border-radius: 6px;">
+                  <option value="dark">Tema Gelap (Premium Dark)</option>
+                  <option value="light">Tema Terang (Clean Light)</option>
+                </select>
+              </div>
+              
+              <!-- Language Selection -->
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="settings-lang" style="font-size: 0.85rem;" id="settings-lang-label">Bahasa Aplikasi</label>
+                <select id="settings-lang" class="filter-select" style="margin-top: 0.5rem; width: 100%; display: block; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border); color: var(--text-primary); padding: 0.5rem; border-radius: 6px;">
+                  <option value="id">Bahasa Indonesia</option>
+                  <option value="en">English (US)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group 2: Akun & Sinkronisasi Cloud (Urusan Perloginan) -->
+          <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1rem; font-family: var(--font-title); margin-bottom: 1.25rem; color: var(--success); display: flex; align-items: center; gap: 0.5rem; text-transform: uppercase; font-weight: 700;" id="settings-sync-title">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Akun & Sinkronisasi Cloud
+            </h3>
+
+            <!-- Connection Status -->
+            <div id="google-disconnected-state" style="text-align: center; padding: 1.5rem 0;">
+              <i class="fa-solid fa-cloud-slash" style="font-size: 2.5rem; color: var(--text-secondary); margin-bottom: 1rem; display: block;"></i>
+              <p style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem;" id="disconnected-msg">Belum Terhubung ke Google Drive</p>
+              <p class="kpi-subtext" style="margin-bottom: 1.25rem; font-size: 0.8rem;" id="disconnected-sub">Hubungkan akun Google Drive Anda untuk menyimpan database secara aman.</p>
+              <button class="btn btn-primary" id="btn-google-connect" style="margin: 0 auto;">
+                <i class="fa-brands fa-google"></i> <span id="connect-btn-text">Hubungkan Akun Google</span>
               </button>
             </div>
 
-            <div id="google-connected-state" style="display: none; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+            <div id="google-connected-state" style="display: none; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; background: rgba(255,255,255,0.02); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--glass-border);">
               <div style="display: flex; align-items: center; gap: 1rem;">
-                <img id="google-user-pic" src="" alt="Foto Profil" style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--primary); background: #222;" onerror="this.src='https://lh3.googleusercontent.com/a/default-user=s48'">
+                <img id="google-user-pic" src="" alt="Foto Profil" style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--primary); background: #222;" onerror="this.src='https://lh3.googleusercontent.com/a/default-user=s48'">
                 <div>
-                  <h3 id="google-user-name" style="margin: 0 0 0.25rem 0; font-size: 1.1rem; font-family: var(--font-title);">Nama Pengguna</h3>
-                  <p id="google-user-email" class="kpi-subtext" style="margin: 0; font-size: 0.85rem;">user@gmail.com</p>
+                  <h4 id="google-user-name" style="margin: 0 0 0.15rem 0; font-size: 0.95rem; font-family: var(--font-title);">Nama Pengguna</h4>
+                  <p id="google-user-email" class="kpi-subtext" style="margin: 0; font-size: 0.8rem;">user@gmail.com</p>
                 </div>
               </div>
               <button class="btn btn-danger btn-sm" id="btn-google-disconnect">
-                <i class="fa-solid fa-right-from-bracket"></i> Putus Koneksi
+                <i class="fa-solid fa-right-from-bracket"></i> <span id="disconnect-btn-text">Putus Koneksi</span>
               </button>
+            </div>
+
+            <!-- Sync Controls -->
+            <div id="google-sync-controls" style="display: none; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 1.25rem;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
+                <div>
+                  <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;" id="auto-sync-title">Sinkronisasi Otomatis</h4>
+                  <p class="kpi-subtext" style="margin: 0; font-size: 0.75rem;" id="auto-sync-desc">Unggah perubahan database secara otomatis ke Google Drive di latar belakang.</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="google-auto-sync-toggle">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div style="background: rgba(0, 242, 254, 0.02); border: 1px solid var(--glass-border); border-radius: 8px; padding: 0.85rem; margin-bottom: 1.25rem;">
+                <p style="margin: 0 0 0.5rem 0; font-size: 0.85rem; font-weight: 600;"><i class="fa-solid fa-circle-info text-primary"></i> <span id="cloud-status-title">Status Data Cloud:</span></p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; font-size: 0.8rem;">
+                  <div>
+                    <span class="kpi-subtext" id="last-sync-label">Terakhir Sinkronisasi:</span>
+                    <div id="google-last-sync" style="font-weight: 600; margin-top: 0.15rem;">Belum pernah</div>
+                  </div>
+                  <div>
+                    <span class="kpi-subtext" id="file-name-label">Nama Berkas di Drive:</span>
+                    <div style="font-weight: 600; margin-top: 0.15rem; font-family: monospace;">ipo_account_db.json</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button class="btn btn-secondary" id="btn-google-download" style="flex: 1; min-width: 150px; justify-content: center; font-size: 0.8rem; padding: 0.5rem 1rem;">
+                  <i class="fa-solid fa-cloud-arrow-down" style="color: var(--secondary);"></i> <span id="download-btn-text">Unduh dari Cloud</span>
+                </button>
+                <button class="btn btn-primary" id="btn-google-upload" style="flex: 1; min-width: 150px; justify-content: center; font-size: 0.8rem; padding: 0.5rem 1rem;">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> <span id="upload-btn-text">Unggah ke Cloud</span>
+                </button>
+              </div>
+              
+              <p class="kpi-subtext text-center mt-3" style="font-size: 0.72rem; line-height: 1.4;" id="download-warn-text">
+                <strong>Peringatan Unduh:</strong> Mengunduh dari Cloud akan menimpa seluruh data lokal saat ini. Harap lakukan ekspor backup manual jika ragu.
+              </p>
             </div>
           </div>
 
-          <!-- Sync Controls (Visible when connected) -->
-          <div id="google-sync-controls" style="display: none; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 1.5rem;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-              <div>
-                <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">Sinkronisasi Otomatis</h4>
-                <p class="kpi-subtext" style="margin: 0; font-size: 0.8rem;">Unggah perubahan database secara otomatis ke Google Drive di latar belakang.</p>
-              </div>
-              <label class="switch">
-                <input type="checkbox" id="google-auto-sync-toggle">
-                <span class="slider"></span>
-              </label>
-            </div>
-
-            <div style="background: rgba(0, 242, 254, 0.03); border: 1px solid rgba(0, 242, 254, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
-              <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem; font-weight: 600;"><i class="fa-solid fa-circle-info text-primary"></i> Status Data Cloud:</p>
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; font-size: 0.85rem;">
-                <div>
-                  <span class="kpi-subtext">Terakhir Sinkronisasi:</span>
-                  <div id="google-last-sync" style="font-weight: 600; margin-top: 0.25rem;">Belum pernah</div>
-                </div>
-                <div>
-                  <span class="kpi-subtext">Nama Berkas di Drive:</span>
-                  <div style="font-weight: 600; margin-top: 0.25rem; font-family: monospace;">ipo_account_db.json</div>
-                </div>
-              </div>
-            </div>
-
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-              <button class="btn btn-secondary" id="btn-google-download" style="flex: 1; min-width: 180px; justify-content: center;">
-                <i class="fa-solid fa-cloud-arrow-down" style="color: var(--secondary);"></i> Unduh dari Cloud
-              </button>
-              <button class="btn btn-primary" id="btn-google-upload" style="flex: 1; min-width: 180px; justify-content: center;">
-                <i class="fa-solid fa-cloud-arrow-up"></i> Unggah ke Cloud
-              </button>
-            </div>
+          <!-- Group 3: Pembersihan & Keamanan Data -->
+          <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1rem; font-family: var(--font-title); margin-bottom: 1.25rem; color: var(--danger); display: flex; align-items: center; gap: 0.5rem; text-transform: uppercase; font-weight: 700;" id="settings-data-title">
+              <i class="fa-solid fa-shield-halved"></i> Manajemen Data & Keamanan
+            </h3>
             
-            <p class="kpi-subtext text-center mt-3" style="font-size: 0.78rem; line-height: 1.4;">
-              <strong>Peringatan Unduh:</strong> Mengunduh dari Cloud akan menimpa seluruh data lokal saat ini dengan data yang ada di Google Drive. Harap lakukan ekspor backup manual jika ragu.
-            </p>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+              <div>
+                <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;" id="reset-data-title">Kosongkan Database</h4>
+                <p class="kpi-subtext" style="margin: 0; font-size: 0.75rem;" id="reset-data-desc">Menghapus seluruh nominee, saham, pesanan, hutang, dan catatan keuangan dari browser ini.</p>
+              </div>
+              <button class="btn btn-danger" id="btn-reset-database">
+                <i class="fa-solid fa-trash-can"></i> <span id="reset-btn-text">Hapus Semua Data</span>
+              </button>
+            </div>
           </div>
 
+          <!-- Group 4: Tentang Aplikasi -->
+          <div style="background: rgba(255, 255, 255, 0.005); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--radius-md);">
+            <h3 style="font-size: 1rem; font-family: var(--font-title); margin-bottom: 1.25rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.5rem; text-transform: uppercase; font-weight: 700;" id="settings-about-title">
+              <i class="fa-solid fa-circle-info"></i> Tentang Aplikasi
+            </h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.8rem; line-height: 1.5; color: var(--text-secondary);">
+              <p><strong>IPO Account Hub</strong> - Version 1.0 (Cache: v2.4)</p>
+              <p id="about-desc">Aplikasi asisten portofolio saham IPO untuk mempermudah tracking pesanan lot, nominal transfer modal ke nominee, perhitungan keuntungan bersih (setelah dipotong broker & exchange fee), persentase keuntungan realisasi, refund sisa uang penjatahan, dan manajemen hutang modal operasional dari kreditur.</p>
+              <p>© 2026 Antigravity System. All rights reserved.</p>
+            </div>
+          </div>
         </div>
       </section>
     </main>
@@ -1016,9 +1077,9 @@
         document.body.appendChild(script);
       }
       // Memuat db.js terlebih dahulu, setelah selesai memuat google-sync.js, kemudian memuat app.js
-      loadScript('js/db.js?v=2.4', function(dbSuccess) {
-        loadScript('js/google-sync.js?v=2.4', function(syncSuccess) {
-          loadScript('js/app.js?v=2.4', function(appSuccess) {
+      loadScript('js/db.js?v=2.5', function(dbSuccess) {
+        loadScript('js/google-sync.js?v=2.5', function(syncSuccess) {
+          loadScript('js/app.js?v=2.5', function(appSuccess) {
             // Cek apakah database, googleSync, dan fungsi utama berhasil dimuat
             if (typeof db === 'undefined' || typeof googleSync === 'undefined' || typeof refreshAll === 'undefined') {
               const errDiv = document.createElement('div');
@@ -1037,9 +1098,9 @@
               errDiv.innerHTML = '<strong>PENTING:</strong> Berkas logika (<code>db.js</code>, <code>google-sync.js</code>, atau <code>app.js</code>) gagal dimuat! Pastikan berkas-berkas tersebut sudah diunggah ke hosting Anda.';
               document.body.appendChild(errDiv);
             }
-          }, 'app.js?v=2.4');
-        }, 'google-sync.js?v=2.4');
-      }, 'db.js?v=2.4');
+          }, 'app.js?v=2.5');
+        }, 'google-sync.js?v=2.5');
+      }, 'db.js?v=2.5');
     })();
   </script>
 </body>

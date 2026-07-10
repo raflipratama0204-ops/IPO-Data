@@ -38,6 +38,69 @@
   --glow-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
+body.light-theme {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(15, 23, 42, 0.08);
+  --glass-border-hover: rgba(15, 23, 42, 0.15);
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  
+  --primary: #0284c7;
+  --primary-glow: rgba(2, 132, 199, 0.1);
+  --secondary: #7c3aed;
+  --secondary-glow: rgba(124, 58, 237, 0.1);
+  
+  --success: #059669;
+  --success-glow: rgba(5, 150, 105, 0.1);
+  --danger: #e11d48;
+  --danger-glow: rgba(225, 29, 72, 0.1);
+  --warning: #d97706;
+  --warning-glow: rgba(217, 119, 6, 0.1);
+  
+  --glow-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.08);
+}
+
+body.light-theme .ambient-glow-1,
+body.light-theme .ambient-glow-2 {
+  opacity: 0.15 !important;
+}
+
+body.light-theme input, 
+body.light-theme select, 
+body.light-theme textarea {
+  background: rgba(0, 0, 0, 0.03) !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(15, 23, 42, 0.1) !important;
+}
+
+body.light-theme input:focus, 
+body.light-theme select:focus, 
+body.light-theme textarea:focus {
+  border-color: var(--primary) !important;
+  background: #ffffff !important;
+}
+
+body.light-theme .login-overlay {
+  background: rgba(248, 250, 252, 0.85) !important;
+}
+
+body.light-theme .login-box {
+  background: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.1) !important;
+}
+
+body.light-theme .login-tagline,
+body.light-theme .login-box p,
+body.light-theme .login-box div,
+body.light-theme .login-box h3,
+body.light-theme .login-box p[style*="color: #fff"] {
+  color: #0f172a !important;
+}
+
 * {
   margin: 0;
   padding: 0;

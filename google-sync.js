@@ -236,6 +236,9 @@
 
     if (!response.ok) {
       const errText = await response.text();
+      if (response.status === 403 || errText.includes('insufficientPermissions') || errText.includes('scope') || errText.includes('Forbidden')) {
+        throw new Error('Izin Google Drive tidak lengkap. Pastikan Anda memberikan centang (check) pada kotak izin akses data Google Drive (AppData) saat login di PC.');
+      }
       throw new Error('Gagal mencari berkas di Google Drive: ' + errText);
     }
 

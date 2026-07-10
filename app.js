@@ -1,5 +1,116 @@
 // js/app.js
 
+const UI_TRANSLATIONS = {
+  id: {
+    titleDashboard: "Dashboard",
+    titleNominees: "Database Akun Nominee",
+    titleStocks: "Daftar Saham IPO",
+    titleOrders: "Portofolio Pesanan Saham",
+    titleTransactions: "Log Keuangan",
+    titleDebts: "Manajemen Hutang Saya",
+    titleSettings: "Pengaturan Aplikasi",
+    
+    subDashboard: "Analisis portofolio, total modal terputar, penjatahan, dan realisasi profit.",
+    subNominees: "Kelola akun nominee (nama keluarga/teman) tempat Anda menitipkan modal IPO.",
+    subStocks: "Daftar saham yang sedang ditransaksikan dan realisasi statistik keuntungannya.",
+    subOrders: "Kelola status pemesanan, penjatahan, hasil jual, dan tagihan refund sisa dana.",
+    subTransactions: "Log pencatatan mutasi transfer modal keluar masuk ke rekening nominee.",
+    subDebts: "Lacak dana pinjaman dari pihak ketiga untuk modal operasional IPO.",
+    subSettings: "Kelola tema tampilan, preferensi bahasa, sinkronisasi cloud Google Drive, dan data lokal.",
+    
+    navDashboard: "Dashboard",
+    navNominees: "Database Akun",
+    navStocks: "Saham IPO",
+    navOrders: "Pesanan Saham",
+    navTransactions: "Log Keuangan",
+    navDebts: "Manajemen Hutang",
+    navSettings: "Pengaturan",
+    
+    confirmReset: "APAKAH ANDA YAKIN INGIN MENGHAPUS SEMUA DATA? Tindakan ini akan menghapus seluruh database lokal (Nominee, Saham, Pesanan, Transaksi, Hutang) secara permanen dan tidak dapat dibatalkan! Silakan lakukan ekspor backup terlebih dahulu jika diperlukan.",
+    confirmResetTitle: "Konfirmasi Hapus Seluruh Database",
+    alertResetSuccess: "Seluruh database lokal berhasil dihapus.",
+    
+    settingsTitle: "Pengaturan Aplikasi",
+    settingsPrefTitle: "Preferensi Tampilan & Bahasa",
+    settingsThemeLabel: "Tema Tampilan",
+    settingsLangLabel: "Bahasa Aplikasi",
+    settingsSyncTitle: "Akun & Sinkronisasi Cloud",
+    settingsDataTitle: "Manajemen Data & Keamanan",
+    settingsAboutTitle: "Tentang Aplikasi",
+    
+    disconnectedMsg: "Belum Terhubung ke Google Drive",
+    disconnectedSub: "Hubungkan akun Google Drive Anda untuk menyimpan database secara aman.",
+    connectBtnText: "Hubungkan Akun Google",
+    disconnectBtnText: "Putus Koneksi",
+    autoSyncTitle: "Sinkronisasi Otomatis",
+    autoSyncDesc: "Unggah perubahan database secara otomatis ke Google Drive di latar belakang.",
+    cloudStatusTitle: "Status Data Cloud:",
+    lastSyncLabel: "Terakhir Sinkronisasi:",
+    fileNameLabel: "Nama Berkas di Drive:",
+    downloadBtnText: "Unduh dari Cloud",
+    uploadBtnText: "Unggah ke Cloud",
+    downloadWarnText: "<strong>Peringatan Unduh:</strong> Mengunduh dari Cloud akan menimpa seluruh data lokal saat ini. Harap lakukan ekspor backup manual jika ragu.",
+    resetDataTitle: "Kosongkan Database",
+    resetDataDesc: "Menghapus seluruh nominee, saham, pesanan, hutang, dan catatan keuangan dari browser ini.",
+    resetBtnText: "Hapus Semua Data",
+    aboutDesc: "Aplikasi asisten portofolio saham IPO untuk mempermudah tracking pesanan lot, nominal transfer modal ke nominee, perhitungan keuntungan bersih (setelah dipotong broker & exchange fee), persentase keuntungan realisasi, refund sisa uang penjatahan, dan manajemen hutang modal operasional dari kreditur."
+  },
+  en: {
+    titleDashboard: "Dashboard",
+    titleNominees: "Nominee Accounts Database",
+    titleStocks: "IPO Stocks List",
+    titleOrders: "Stock Orders Portfolio",
+    titleTransactions: "Financial Log",
+    titleDebts: "My Debts Management",
+    titleSettings: "Application Settings",
+    
+    subDashboard: "Portfolio analysis, total rotated capital, allotments, and profit realizations.",
+    subNominees: "Manage nominee accounts (family/friends) where you deposit your IPO capital.",
+    subStocks: "List of stocks being traded and their realized profit statistics.",
+    subOrders: "Manage order status, allotments, sales proceeds, and refund balances.",
+    subTransactions: "Log of capital transfer transactions to and from nominee accounts.",
+    subDebts: "Track funds borrowed from third parties for IPO operational capital.",
+    subSettings: "Manage display themes, language preferences, Google Drive cloud sync, and local data.",
+    
+    navDashboard: "Dashboard",
+    navNominees: "Nominee Database",
+    navStocks: "IPO Stocks",
+    navOrders: "Stock Orders",
+    navTransactions: "Financial Log",
+    navDebts: "Debt Management",
+    navSettings: "Settings",
+    
+    confirmReset: "ARE YOU ABSOLUTELY SURE YOU WANT TO RESET ALL DATA? This action will permanently wipe all local database records (Nominees, Stocks, Orders, Transactions, Debts) and cannot be undone! Please export a backup first if needed.",
+    confirmResetTitle: "Confirm Reset Database",
+    alertResetSuccess: "All local database records have been successfully cleared.",
+    
+    settingsTitle: "Application Settings",
+    settingsPrefTitle: "Display & Language Preferences",
+    settingsThemeLabel: "Application Theme",
+    settingsLangLabel: "Application Language",
+    settingsSyncTitle: "Account & Cloud Sync",
+    settingsDataTitle: "Data Management & Security",
+    settingsAboutTitle: "About Application",
+    
+    disconnectedMsg: "Not Connected to Google Drive",
+    disconnectedSub: "Connect your Google Drive account to store your database securely.",
+    connectBtnText: "Connect Google Account",
+    disconnectBtnText: "Disconnect",
+    autoSyncTitle: "Automatic Synchronization",
+    autoSyncDesc: "Automatically upload database changes to Google Drive in the background.",
+    cloudStatusTitle: "Cloud Data Status:",
+    lastSyncLabel: "Last Synchronized:",
+    fileNameLabel: "Drive File Name:",
+    downloadBtnText: "Download from Cloud",
+    uploadBtnText: "Upload to Cloud",
+    downloadWarnText: "<strong>Download Warning:</strong> Downloading from Cloud will overwrite all current local data. Please perform a manual export backup if unsure.",
+    resetDataTitle: "Reset Database",
+    resetDataDesc: "Deletes all nominees, stocks, orders, debts, and financial logs from this browser.",
+    resetBtnText: "Clear All Data",
+    aboutDesc: "IPO portfolio assistant application to simplify tracking of lot orders, nominee capital transfers, net profit calculation (after deducting broker & exchange fees), realized profit percentage, allotment refund balance, and debt capital management."
+  }
+};
+
 // Currency Formatting Helper
 function formatRupiah(amount) {
   if (amount === undefined || amount === null) return 'Rp 0';
@@ -83,8 +194,158 @@ let profitChart = null;
 let isSigningIn = false;
 let syncPollInterval = null;
 
+function updateHeaderTitle() {
+  const pageTitle = document.getElementById('page-title');
+  const pageSubtitle = document.getElementById('page-subtitle');
+  if (!pageTitle || !pageSubtitle) return;
+
+  const lang = localStorage.getItem('app_lang') || 'id';
+  const dict = UI_TRANSLATIONS[lang] || UI_TRANSLATIONS.id;
+
+  const headersMap = {
+    dashboard: {
+      title: lang === 'id' ? 'Ringkasan Portofolio' : 'Portfolio Summary',
+      subtitle: lang === 'id' ? 'Selamat datang kembali! Berikut adalah statistik agregat akun IPO Anda.' : 'Welcome back! Here are the aggregated statistics of your IPO accounts.'
+    },
+    nominees: {
+      title: dict.titleNominees,
+      subtitle: dict.subNominees
+    },
+    stocks: {
+      title: dict.titleStocks,
+      subtitle: dict.subStocks
+    },
+    orders: {
+      title: dict.titleOrders,
+      subtitle: dict.subOrders
+    },
+    transactions: {
+      title: dict.titleTransactions,
+      subtitle: dict.subTransactions
+    },
+    debts: {
+      title: dict.titleDebts,
+      subtitle: dict.subDebts
+    },
+    settings: {
+      title: dict.titleSettings,
+      subtitle: dict.subSettings
+    }
+  };
+
+  if (headersMap[currentTab]) {
+    pageTitle.textContent = headersMap[currentTab].title;
+    pageSubtitle.textContent = headersMap[currentTab].subtitle;
+  }
+}
+
+function applyLanguage() {
+  const lang = localStorage.getItem('app_lang') || 'id';
+  const dict = UI_TRANSLATIONS[lang] || UI_TRANSLATIONS.id;
+
+  // Sidebar items
+  const sidebarDashboard = document.querySelector('#nav-dashboard .nav-text');
+  if (sidebarDashboard) sidebarDashboard.textContent = dict.navDashboard;
+  const sidebarNominees = document.querySelector('#nav-nominees .nav-text');
+  if (sidebarNominees) sidebarNominees.textContent = dict.navNominees;
+  const sidebarStocks = document.querySelector('#nav-stocks .nav-text');
+  if (sidebarStocks) sidebarStocks.textContent = dict.navStocks;
+  const sidebarOrders = document.querySelector('#nav-orders .nav-text');
+  if (sidebarOrders) sidebarOrders.textContent = dict.navOrders;
+  const sidebarTransactions = document.querySelector('#nav-transactions .nav-text');
+  if (sidebarTransactions) sidebarTransactions.textContent = dict.navTransactions;
+  const sidebarDebts = document.querySelector('#nav-debts .nav-text');
+  if (sidebarDebts) sidebarDebts.textContent = dict.navDebts;
+  const sidebarSettings = document.querySelector('#nav-settings .nav-text');
+  if (sidebarSettings) sidebarSettings.textContent = dict.navSettings;
+
+  // Settings page text elements
+  const elSettingsTitle = document.getElementById('settings-title');
+  if (elSettingsTitle) elSettingsTitle.innerHTML = `<i class="fa-solid fa-gear text-primary"></i> ${dict.settingsTitle}`;
+  
+  const elSettingsPref = document.getElementById('settings-pref-title');
+  if (elSettingsPref) elSettingsPref.innerHTML = `<i class="fa-solid fa-palette"></i> ${dict.settingsPrefTitle}`;
+  
+  const elThemeLabel = document.getElementById('settings-theme-label');
+  if (elThemeLabel) elThemeLabel.textContent = dict.settingsThemeLabel;
+  
+  const elLangLabel = document.getElementById('settings-lang-label');
+  if (elLangLabel) elLangLabel.textContent = dict.settingsLangLabel;
+  
+  const elSettingsSync = document.getElementById('settings-sync-title');
+  if (elSettingsSync) elSettingsSync.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> ${dict.settingsSyncTitle}`;
+  
+  const elDisconnectedMsg = document.getElementById('disconnected-msg');
+  if (elDisconnectedMsg) elDisconnectedMsg.textContent = dict.disconnectedMsg;
+  
+  const elDisconnectedSub = document.getElementById('disconnected-sub');
+  if (elDisconnectedSub) elDisconnectedSub.textContent = dict.disconnectedSub;
+  
+  const elConnectText = document.getElementById('connect-btn-text');
+  if (elConnectText) elConnectText.textContent = dict.connectBtnText;
+  
+  const elDisconnectText = document.getElementById('disconnect-btn-text');
+  if (elDisconnectText) elDisconnectText.textContent = dict.disconnectBtnText;
+  
+  const elAutoSyncTitle = document.getElementById('auto-sync-title');
+  if (elAutoSyncTitle) elAutoSyncTitle.textContent = dict.autoSyncTitle;
+  
+  const elAutoSyncDesc = document.getElementById('auto-sync-desc');
+  if (elAutoSyncDesc) elAutoSyncDesc.textContent = dict.autoSyncDesc;
+  
+  const elCloudStatusTitle = document.getElementById('cloud-status-title');
+  if (elCloudStatusTitle) elCloudStatusTitle.textContent = dict.cloudStatusTitle;
+  
+  const elLastSyncLabel = document.getElementById('last-sync-label');
+  if (elLastSyncLabel) elLastSyncLabel.textContent = dict.lastSyncLabel;
+  
+  const elFileNameLabel = document.getElementById('file-name-label');
+  if (elFileNameLabel) elFileNameLabel.textContent = dict.filenameLabel || dict.fileNameLabel;
+  
+  const elDownloadText = document.getElementById('download-btn-text');
+  if (elDownloadText) elDownloadText.textContent = dict.downloadBtnText;
+  
+  const elUploadText = document.getElementById('upload-btn-text');
+  if (elUploadText) elUploadText.textContent = dict.uploadBtnText;
+  
+  const elDownloadWarn = document.getElementById('download-warn-text');
+  if (elDownloadWarn) elDownloadWarn.innerHTML = dict.downloadWarnText;
+  
+  const elSettingsData = document.getElementById('settings-data-title');
+  if (elSettingsData) elSettingsData.innerHTML = `<i class="fa-solid fa-shield-halved"></i> ${dict.settingsDataTitle}`;
+  
+  const elResetTitle = document.getElementById('reset-data-title');
+  if (elResetTitle) elResetTitle.textContent = dict.resetDataTitle;
+  
+  const elResetDesc = document.getElementById('reset-data-desc');
+  if (elResetDesc) elResetDesc.textContent = dict.resetDataDesc;
+  
+  const elResetText = document.getElementById('reset-btn-text');
+  if (elResetText) elResetText.textContent = dict.resetBtnText;
+  
+  const elSettingsAbout = document.getElementById('settings-about-title');
+  if (elSettingsAbout) elSettingsAbout.innerHTML = `<i class="fa-solid fa-circle-info"></i> ${dict.settingsAboutTitle}`;
+  
+  const elAboutDesc = document.getElementById('about-desc');
+  if (elAboutDesc) elAboutDesc.textContent = dict.aboutDesc;
+
+  // Active tab titles/subtitles
+  updateHeaderTitle();
+}
+
 // App initialization function
 function initApp() {
+  // Load Theme
+  const savedTheme = localStorage.getItem('app_theme') || 'dark';
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-theme');
+  } else {
+    document.body.classList.remove('light-theme');
+  }
+
+  // Apply UI translation
+  applyLanguage();
+
   // db is loaded globally from js/db.js
   if (typeof db !== 'undefined') {
     db.initDB();
@@ -101,6 +362,9 @@ function initApp() {
   
   // Setup Search and Filters
   setupFilters();
+  
+  // Setup Settings Page Handlers
+  setupSettingsHandlers();
   
   // Setup Form Submissions
   setupForms();
@@ -171,40 +435,7 @@ function setupSidebarToggle() {
 function setupTabs() {
   const navItems = document.querySelectorAll('.nav-item');
   const tabContents = document.querySelectorAll('.tab-content');
-  const pageTitle = document.getElementById('page-title');
-  const pageSubtitle = document.getElementById('page-subtitle');
   
-  const headersMap = {
-    dashboard: {
-      title: 'Ringkasan Portofolio',
-      subtitle: 'Selamat datang kembali! Berikut adalah statistik agregat akun IPO Anda.'
-    },
-    nominees: {
-      title: 'Database Akun Nominee',
-      subtitle: 'Daftar pemilik akun nominee yang digunakan untuk memesan IPO.'
-    },
-    stocks: {
-      title: 'Daftar Saham IPO',
-      subtitle: 'Kelola database saham yang sedang atau telah melakukan IPO.'
-    },
-    orders: {
-      title: 'Transaksi Pemesanan Saham',
-      subtitle: 'Catat pesanan lot, input hasil penjatahan, dan input harga jual saham.'
-    },
-    transactions: {
-      title: 'Log Keuangan',
-      subtitle: 'Log keluar masuknya dana transfer modal dan pengembalian dana dari akun nominee.'
-    },
-    debts: {
-      title: 'Manajemen Hutang Saya',
-      subtitle: 'Lacak dana pinjaman dari pihak ketiga untuk modal operasional IPO.'
-    },
-    cloud: {
-      title: 'Sinkronisasi Cloud Google Drive',
-      subtitle: 'Amankan dan sinkronisasikan database portfolio akun IPO Anda ke Google Drive pribadi.'
-    }
-  };
-
   navItems.forEach(item => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
@@ -216,13 +447,13 @@ function setupTabs() {
       
       // Update content state
       tabContents.forEach(content => content.classList.remove('active'));
-      document.getElementById(`tab-${targetTab}`).classList.add('active');
-      
-      // Update titles
-      pageTitle.textContent = headersMap[targetTab].title;
-      pageSubtitle.textContent = headersMap[targetTab].subtitle;
+      const targetTabEl = document.getElementById(`tab-${targetTab}`);
+      if (targetTabEl) targetTabEl.classList.add('active');
       
       currentTab = targetTab;
+      
+      // Update dynamic titles based on current language
+      updateHeaderTitle();
       
       // Reload relevant data
       if (currentTab === 'dashboard') {
@@ -237,7 +468,7 @@ function setupTabs() {
         renderTransactions();
       } else if (currentTab === 'debts') {
         renderDebts();
-      } else if (currentTab === 'cloud') {
+      } else if (currentTab === 'settings' || currentTab === 'cloud') {
         updateGoogleSyncUI();
       }
     });
@@ -1110,6 +1341,82 @@ function setupFilters() {
     }
     renderOrders();
   });
+}
+
+function setupSettingsHandlers() {
+  const selectTheme = document.getElementById('settings-theme');
+  const selectLang = document.getElementById('settings-lang');
+  const btnReset = document.getElementById('btn-reset-database');
+  
+  if (selectTheme) {
+    // Populate current value
+    selectTheme.value = localStorage.getItem('app_theme') || 'dark';
+    selectTheme.addEventListener('change', (e) => {
+      const value = e.target.value;
+      localStorage.setItem('app_theme', value);
+      if (value === 'light') {
+        document.body.classList.add('light-theme');
+      } else {
+        document.body.classList.remove('light-theme');
+      }
+      
+      // Re-render dashboard/charts with new theme colors
+      if (currentTab === 'dashboard') {
+        renderDashboard();
+      }
+    });
+  }
+  
+  if (selectLang) {
+    // Populate current value
+    selectLang.value = localStorage.getItem('app_lang') || 'id';
+    selectLang.addEventListener('change', (e) => {
+      const value = e.target.value;
+      localStorage.setItem('app_lang', value);
+      applyLanguage();
+      refreshAll();
+    });
+  }
+  
+  if (btnReset) {
+    btnReset.addEventListener('click', async () => {
+      const lang = localStorage.getItem('app_lang') || 'id';
+      const dict = UI_TRANSLATIONS[lang] || UI_TRANSLATIONS.id;
+      
+      const isConfirmed = await showCustomConfirm(dict.confirmReset, dict.confirmResetTitle);
+      if (isConfirmed) {
+        db.saveDB({
+          nominees: [],
+          stocks: [],
+          orders: [],
+          transfers: [],
+          debts: []
+        });
+        showCustomAlert(dict.alertResetSuccess);
+        
+        // Disconnect google sync so we do not overwrite cloud data
+        if (typeof googleSync !== 'undefined' && googleSync.isConnected()) {
+          localStorage.removeItem('user_mode');
+          localStorage.removeItem('google_connected');
+          if (syncPollInterval) {
+            clearInterval(syncPollInterval);
+            syncPollInterval = null;
+          }
+          googleSync.disconnect();
+          
+          const loginOverlay = document.getElementById('login-overlay');
+          if (loginOverlay) {
+            loginOverlay.style.display = 'flex';
+            setTimeout(() => {
+              loginOverlay.classList.remove('hidden');
+            }, 50);
+          }
+        }
+        
+        refreshAll();
+      }
+    });
+  }
 }
 
 // ----------------- RENDERING SYSTEM -----------------
