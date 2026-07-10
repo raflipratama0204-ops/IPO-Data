@@ -21,6 +21,8 @@
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Identity Services (GSI) for Google Sign-In -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <!-- Error overlay for debugging hosted environment -->
@@ -92,6 +94,12 @@
           <a class="nav-item" data-tab="debts" id="nav-debts">
             <i class="fa-solid fa-hand-holding-dollar"></i>
             <span class="nav-text">Manajemen Hutang</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="cloud" id="nav-cloud">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span class="nav-text">Sinkronisasi Cloud</span>
           </a>
         </li>
       </ul>
@@ -421,6 +429,97 @@
               </tbody>
             </table>
           </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: CLOUD ================= -->
+      <section id="tab-cloud" class="tab-content">
+        <div class="glass-card" style="max-width: 700px; margin: 0 auto; --accent: var(--primary); --accent-glow: rgba(0, 242, 254, 0.15);">
+          <div class="section-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 1.25rem; margin-bottom: 1.5rem;">
+            <h2 class="section-title" style="margin: 0;"><i class="fa-solid fa-cloud-arrow-up text-primary"></i> Sinkronisasi Cloud Google Drive</h2>
+          </div>
+
+          <!-- Configuration Section -->
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="google-client-id" style="font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+              Google OAuth Client ID
+              <span class="tooltip" title="Dapatkan Client ID dari Google Cloud Console dengan scope drive.appdata"><i class="fa-solid fa-circle-question"></i></span>
+            </label>
+            <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+              <input type="text" id="google-client-id" placeholder="Masukkan Client ID Google Anda..." style="flex: 1; padding: 0.6rem 0.8rem; border-radius: var(--radius-sm); background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); color: #fff;">
+              <button class="btn btn-secondary" id="btn-save-client-id">Simpan ID</button>
+            </div>
+            <p class="kpi-subtext mt-2" style="font-size: 0.8rem; line-height: 1.4;">
+              * Jika belum punya, buat project di <a href="https://console.cloud.google.com/" target="_blank" style="color: var(--primary); text-decoration: underline;">Google Cloud Console</a>, aktifkan <strong>Google Drive API</strong>, lalu buat <strong>OAuth Client ID</strong> untuk jenis <em>Web Application</em> dengan Authorized JavaScript Origin web Anda (atau <code>http://localhost:8000</code>).
+            </p>
+          </div>
+
+          <!-- Connection Status Card -->
+          <div class="glass-card" id="google-status-card" style="background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.1); margin-bottom: 1.5rem; padding: 1.25rem;">
+            <div id="google-disconnected-state" style="text-align: center; padding: 1rem 0;">
+              <i class="fa-solid fa-cloud-slash" style="font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem; display: block;"></i>
+              <p style="font-weight: 600; font-size: 1.05rem; margin-bottom: 0.5rem;">Belum Terhubung ke Google Drive</p>
+              <p class="kpi-subtext" style="margin-bottom: 1.25rem;">Simpan Client ID Anda lalu klik tombol di bawah untuk masuk menggunakan akun Google Anda.</p>
+              <button class="btn btn-primary" id="btn-google-connect">
+                <i class="fa-brands fa-google"></i> Hubungkan Akun Google
+              </button>
+            </div>
+
+            <div id="google-connected-state" style="display: none; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 1rem;">
+                <img id="google-user-pic" src="" alt="Foto Profil" style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--primary); background: #222;" onerror="this.src='https://lh3.googleusercontent.com/a/default-user=s48'">
+                <div>
+                  <h3 id="google-user-name" style="margin: 0 0 0.25rem 0; font-size: 1.1rem; font-family: var(--font-title);">Nama Pengguna</h3>
+                  <p id="google-user-email" class="kpi-subtext" style="margin: 0; font-size: 0.85rem;">user@gmail.com</p>
+                </div>
+              </div>
+              <button class="btn btn-danger btn-sm" id="btn-google-disconnect">
+                <i class="fa-solid fa-right-from-bracket"></i> Putus Koneksi
+              </button>
+            </div>
+          </div>
+
+          <!-- Sync Controls (Visible when connected) -->
+          <div id="google-sync-controls" style="display: none; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 1.5rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+              <div>
+                <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">Sinkronisasi Otomatis</h4>
+                <p class="kpi-subtext" style="margin: 0; font-size: 0.8rem;">Unggah perubahan database secara otomatis ke Google Drive di latar belakang.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="google-auto-sync-toggle">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div style="background: rgba(0, 242, 254, 0.03); border: 1px solid rgba(0, 242, 254, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+              <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem; font-weight: 600;"><i class="fa-solid fa-circle-info text-primary"></i> Status Data Cloud:</p>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; font-size: 0.85rem;">
+                <div>
+                  <span class="kpi-subtext">Terakhir Sinkronisasi:</span>
+                  <div id="google-last-sync" style="font-weight: 600; margin-top: 0.25rem;">Belum pernah</div>
+                </div>
+                <div>
+                  <span class="kpi-subtext">Nama Berkas di Drive:</span>
+                  <div style="font-weight: 600; margin-top: 0.25rem; font-family: monospace;">ipo_account_db.json</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+              <button class="btn btn-secondary" id="btn-google-download" style="flex: 1; min-width: 180px; justify-content: center;">
+                <i class="fa-solid fa-cloud-arrow-down" style="color: var(--secondary);"></i> Unduh dari Cloud
+              </button>
+              <button class="btn btn-primary" id="btn-google-upload" style="flex: 1; min-width: 180px; justify-content: center;">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Unggah ke Cloud
+              </button>
+            </div>
+            
+            <p class="kpi-subtext text-center mt-3" style="font-size: 0.78rem; line-height: 1.4;">
+              <strong>Peringatan Unduh:</strong> Mengunduh dari Cloud akan menimpa seluruh data lokal saat ini dengan data yang ada di Google Drive. Harap lakukan ekspor backup manual jika ragu.
+            </p>
+          </div>
+
         </div>
       </section>
     </main>
@@ -907,29 +1006,30 @@
         };
         document.body.appendChild(script);
       }
-
-      // Memuat db.js terlebih dahulu, setelah selesai baru memuat app.js
+      // Memuat db.js terlebih dahulu, setelah selesai memuat google-sync.js, kemudian memuat app.js
       loadScript('js/db.js?v=1.1', function(dbSuccess) {
-        loadScript('js/app.js?v=1.1', function(appSuccess) {
-          // Cek apakah database dan fungsi utama berhasil dimuat
-          if (typeof db === 'undefined' || typeof refreshAll === 'undefined') {
-            const errDiv = document.createElement('div');
-            errDiv.style.position = 'fixed';
-            errDiv.style.top = '0';
-            errDiv.style.left = '0';
-            errDiv.style.width = '100%';
-            errDiv.style.background = 'rgba(220, 38, 38, 0.95)';
-            errDiv.style.color = '#ffffff';
-            errDiv.style.padding = '12px';
-            errDiv.style.zIndex = '999999';
-            errDiv.style.fontSize = '14px';
-            errDiv.style.fontFamily = 'sans-serif';
-            errDiv.style.textAlign = 'center';
-            errDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
-            errDiv.innerHTML = '<strong>PENTING:</strong> Berkas logika (<code>db.js</code> atau <code>app.js</code>) gagal dimuat dari folder <code>js/</code> maupun direktori utama! Pastikan berkas-berkas tersebut sudah diunggah ke hosting Anda.';
-            document.body.appendChild(errDiv);
-          }
-        }, 'app.js?v=1.1');
+        loadScript('js/google-sync.js?v=1.1', function(syncSuccess) {
+          loadScript('js/app.js?v=1.1', function(appSuccess) {
+            // Cek apakah database, googleSync, dan fungsi utama berhasil dimuat
+            if (typeof db === 'undefined' || typeof googleSync === 'undefined' || typeof refreshAll === 'undefined') {
+              const errDiv = document.createElement('div');
+              errDiv.style.position = 'fixed';
+              errDiv.style.top = '0';
+              errDiv.style.left = '0';
+              errDiv.style.width = '100%';
+              errDiv.style.background = 'rgba(220, 38, 38, 0.95)';
+              errDiv.style.color = '#ffffff';
+              errDiv.style.padding = '12px';
+              errDiv.style.zIndex = '999999';
+              errDiv.style.fontSize = '14px';
+              errDiv.style.fontFamily = 'sans-serif';
+              errDiv.style.textAlign = 'center';
+              errDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
+              errDiv.innerHTML = '<strong>PENTING:</strong> Berkas logika (<code>db.js</code>, <code>google-sync.js</code>, atau <code>app.js</code>) gagal dimuat! Pastikan berkas-berkas tersebut sudah diunggah ke hosting Anda.';
+              document.body.appendChild(errDiv);
+            }
+          }, 'app.js?v=1.1');
+        }, 'google-sync.js?v=1.1');
       }, 'db.js?v=1.1');
     })();
   </script>

@@ -54,6 +54,11 @@
       console.warn('Failed to save to localStorage, saving to memoryStorage instead.', e);
       memoryStorage = JSON.stringify(data);
     }
+    
+    // Auto-sync to Google Drive if connected and active
+    if (global.googleSync && typeof global.googleSync.autoUpload === 'function') {
+      global.googleSync.autoUpload(data);
+    }
   }
 
   function parseCurrency(val) {

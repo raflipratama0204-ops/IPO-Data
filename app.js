@@ -114,6 +114,9 @@ function initApp() {
 
   // Initialize Currency Input Masking
   initAllCurrencyInputs();
+
+  // Initialize Google Drive Sync
+  setupGoogleSync();
 }
 
 // Run initialization immediately if the document has already loaded
@@ -193,6 +196,10 @@ function setupTabs() {
     debts: {
       title: 'Manajemen Hutang Saya',
       subtitle: 'Lacak dana pinjaman dari pihak ketiga untuk modal operasional IPO.'
+    },
+    cloud: {
+      title: 'Sinkronisasi Cloud Google Drive',
+      subtitle: 'Amankan dan sinkronisasikan database portfolio akun IPO Anda ke Google Drive pribadi.'
     }
   };
 
@@ -228,6 +235,8 @@ function setupTabs() {
         renderTransactions();
       } else if (currentTab === 'debts') {
         renderDebts();
+      } else if (currentTab === 'cloud') {
+        updateGoogleSyncUI();
       }
     });
   });
@@ -1883,3 +1892,163 @@ function showCustomConfirm(message, confirmTitle = 'Konfirmasi Aksi') {
     });
   });
 }
+
+// ----------------- GOOGLE DRIVE SYNC HANDLERS -----------------
+function setupGoogleSync() {
+  const btnSaveId = document.getElementById('btn-save-client-id');
+  const inputClientId = document.getElementById('google-client-id');
+  const btnConnect = document.getElementById('btn-google-connect');
+  const btnDisconnect = document.getElementById('btn-google-disconnect');
+  const btnUpload = document.getElementById('btn-google-upload');
+  const btnDownload = document.getElementById('btn-google-download');
+  const toggleAuto = document.getElementById('google-auto-sync-toggle');
+
+  if (!inputClientId) return; // Prevent errors if UI is not fully present
+
+  // Load saved client ID
+  inputClientId.value = googleSync.getClientId();
+
+  // Bind status callback
+  googleSync.registerStatusCallback(updateGoogleSyncUI);
+
+  // Initialize GIS client and check session
+  googleSync.init((status) => {
+    console.log('Google Sync Initialized status:', status);
+    updateGoogleSyncUI();
+  });
+
+  // Save Client ID
+  btnSaveId.addEventListener('click', () => {
+    const id = inputClientId.value.trim();
+    if (!id) {
+      showCustomAlert('Silakan masukkan Client ID yang valid.');
+      return;
+    }
+    googleSync.saveClientId(id);
+    showCustomAlert('Google Client ID berhasil disimpan dan diinisialisasi.');
+  });
+
+  // Connect Google Account
+  btnConnect.addEventListener('click', () => {
+    const id = inputClientId.value.trim();
+    if (!id) {
+      showCustomAlert('Silakan masukkan Google Client ID terlebih dahulu dan klik "Simpan ID".');
+      return;
+    }
+    googleSync.connect();
+  });
+
+  // Disconnect Google Account
+  btnDisconnect.addEventListener('click', () => {
+    googleSync.disconnect();
+  });
+
+  // Manual Upload
+  btnUpload.addEventListener('click', async () => {
+    btnUpload.disabled = true;
+    const originalHtml = btnUpload.innerHTML;
+    btnUpload.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengunggah...';
+    try {
+      const dbData = db.getDB();
+      await googleSync.uploadData(dbData);
+      localStorage.setItem('google_last_sync_time', new Date().toISOString());
+      updateGoogleSyncUI();
+      showCustomAlert('Database berhasil diunggah ke Google Drive.');
+    } catch (err) {
+      console.error(err);
+      showCustomAlert('Gagal mengunggah data: ' + err.message);
+    } finally {
+      btnUpload.disabled = false;
+      btnUpload.innerHTML = originalHtml;
+    }
+  });
+
+  // Manual Download
+  btnDownload.addEventListener('click', async () => {
+    const confirmText = 'Apakah Anda yakin ingin mengunduh data dari Cloud? Data lokal saat ini akan DITIMPA secara keseluruhan. Silakan lakukan ekspor backup manual terlebih dahulu jika perlu.';
+    const confirm = await showCustomConfirm(confirmText, 'Konfirmasi Unduh Cloud');
+    if (!confirm) return;
+
+    btnDownload.disabled = true;
+    const originalHtml = btnDownload.innerHTML;
+    btnDownload.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengunduh...';
+    try {
+      const data = await googleSync.downloadData();
+      if (data && (data.nominees || data.stocks || data.orders)) {
+        // Save to DB and refresh UI
+        db.saveDB(data);
+        refreshAll();
+        localStorage.setItem('google_last_sync_time', new Date().toISOString());
+        updateGoogleSyncUI();
+        showCustomAlert('Database berhasil diunduh dan dipulihkan dari Google Drive.');
+      } else {
+        throw new Error('Format berkas tidak valid atau kosong.');
+      }
+    } catch (err) {
+      console.error(err);
+      showCustomAlert('Gagal mengunduh data: ' + err.message);
+    } finally {
+      btnDownload.disabled = false;
+      btnDownload.innerHTML = originalHtml;
+    }
+  });
+
+  // Toggle Auto Sync
+  toggleAuto.checked = googleSync.isSyncEnabled();
+  toggleAuto.addEventListener('change', (e) => {
+    googleSync.setSyncEnabled(e.target.checked);
+  });
+}
+
+async function updateGoogleSyncUI() {
+  const disconnectState = document.getElementById('google-disconnected-state');
+  const connectedState = document.getElementById('google-connected-state');
+  const syncControls = document.getElementById('google-sync-controls');
+  const userNameEl = document.getElementById('google-user-name');
+  const userEmailEl = document.getElementById('google-user-email');
+  const userPicEl = document.getElementById('google-user-pic');
+  const lastSyncEl = document.getElementById('google-last-sync');
+  const autoSyncToggle = document.getElementById('google-auto-sync-toggle');
+
+  if (!disconnectState) return;
+
+  const connected = googleSync.isConnected();
+  
+  if (connected) {
+    disconnectState.style.display = 'none';
+    connectedState.style.display = 'flex';
+    syncControls.style.display = 'block';
+
+    const user = googleSync.getUserInfo();
+    if (user) {
+      userNameEl.textContent = user.name || 'Pengguna Google';
+      userEmailEl.textContent = user.email || '';
+      userPicEl.src = user.picture || 'https://lh3.googleusercontent.com/a/default-user=s48';
+    }
+  } else {
+    disconnectState.style.display = 'block';
+    connectedState.style.display = 'none';
+    syncControls.style.display = 'none';
+  }
+
+  // Last Sync display formatting
+  const lastSyncTime = localStorage.getItem('google_last_sync_time');
+  if (lastSyncTime) {
+    const date = new Date(lastSyncTime);
+    lastSyncEl.textContent = date.toLocaleString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } else {
+    lastSyncEl.textContent = 'Belum pernah';
+  }
+
+  // Update auto sync checkbox
+  if (autoSyncToggle) {
+    autoSyncToggle.checked = googleSync.isSyncEnabled();
+  }
+}
+
