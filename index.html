@@ -46,6 +46,31 @@
     });
   </script>
 
+  <!-- Login Splash Screen Overlay -->
+  <div id="login-overlay" class="login-overlay">
+    <div class="login-box">
+      <div class="login-box-glow"></div>
+      <div class="login-logo-container">
+        <div class="login-logo-icon">IP</div>
+        <div class="login-logo-text">IPO HUB</div>
+      </div>
+      <p class="login-tagline">
+        Kelola database portofolio akun nominee dan transaksi saham IPO Anda secara aman di Google Drive Anda.
+      </p>
+      <div class="login-buttons">
+        <button class="btn btn-login-google" id="btn-login-google">
+          <i class="fa-brands fa-google"></i> Hubungkan dengan Google
+        </button>
+        <button class="btn btn-login-guest" id="btn-login-guest">
+          <i class="fa-solid fa-user-secret"></i> Masuk sebagai Tamu (Offline)
+        </button>
+      </div>
+      <p class="login-footer-text">
+        * Mode Tamu menyimpan data secara lokal di browser Anda. Mode Google mencadangkan data secara aman di Google Drive pribadi Anda.
+      </p>
+    </div>
+  </div>
+
   <div class="ambient-glow-1"></div>
   <div class="ambient-glow-2"></div>
 
@@ -1007,9 +1032,9 @@
         document.body.appendChild(script);
       }
       // Memuat db.js terlebih dahulu, setelah selesai memuat google-sync.js, kemudian memuat app.js
-      loadScript('js/db.js?v=1.2', function(dbSuccess) {
-        loadScript('js/google-sync.js?v=1.2', function(syncSuccess) {
-          loadScript('js/app.js?v=1.2', function(appSuccess) {
+      loadScript('js/db.js?v=1.3', function(dbSuccess) {
+        loadScript('js/google-sync.js?v=1.3', function(syncSuccess) {
+          loadScript('js/app.js?v=1.3', function(appSuccess) {
             // Cek apakah database, googleSync, dan fungsi utama berhasil dimuat
             if (typeof db === 'undefined' || typeof googleSync === 'undefined' || typeof refreshAll === 'undefined') {
               const errDiv = document.createElement('div');
@@ -1028,9 +1053,9 @@
               errDiv.innerHTML = '<strong>PENTING:</strong> Berkas logika (<code>db.js</code>, <code>google-sync.js</code>, atau <code>app.js</code>) gagal dimuat! Pastikan berkas-berkas tersebut sudah diunggah ke hosting Anda.';
               document.body.appendChild(errDiv);
             }
-          }, 'app.js?v=1.2');
-        }, 'google-sync.js?v=1.2');
-      }, 'db.js?v=1.2');
+          }, 'app.js?v=1.3');
+        }, 'google-sync.js?v=1.3');
+      }, 'db.js?v=1.3');
     })();
   </script>
 </body>
