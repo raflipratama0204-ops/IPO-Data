@@ -1894,6 +1894,34 @@ function showCustomConfirm(message, confirmTitle = 'Konfirmasi Aksi') {
 }
 
 // ----------------- GOOGLE DRIVE SYNC HANDLERS -----------------
+let isSigningIn = false;
+
+function bindLoginOverlayButtons() {
+  const btnLoginGoogle = document.getElementById('btn-login-google');
+  const btnLoginGuest = document.getElementById('btn-login-guest');
+  const loginOverlay = document.getElementById('login-overlay');
+
+  if (btnLoginGoogle && btnLoginGuest && loginOverlay) {
+    btnLoginGuest.addEventListener('click', () => {
+      localStorage.setItem('user_mode', 'guest');
+      loginOverlay.classList.add('hidden');
+      setTimeout(() => {
+        loginOverlay.style.display = 'none';
+      }, 400); // Wait for transition
+    });
+
+    btnLoginGoogle.addEventListener('click', () => {
+      const id = googleSync.getClientId();
+      if (!id) {
+        showCustomAlert('Google Client ID tidak dikonfigurasi. Periksa berkas google-sync.js.');
+        return;
+      }
+      isSigningIn = true; // Set flag to trigger cloud data download upon successful login
+      googleSync.connect();
+    });
+  }
+}
+
 function setupGoogleSync() {
   const btnSaveId = document.getElementById('btn-save-client-id');
   const inputClientId = document.getElementById('google-client-id');
@@ -1910,6 +1938,9 @@ function setupGoogleSync() {
 
   // Bind status callback
   googleSync.registerStatusCallback(updateGoogleSyncUI);
+
+  // Bind login overlay buttons
+  bindLoginOverlayButtons();
 
   // Initialize GIS client and check session
   googleSync.init((status) => {
@@ -1932,15 +1963,26 @@ function setupGoogleSync() {
   btnConnect.addEventListener('click', () => {
     const id = inputClientId.value.trim();
     if (!id) {
-      showCustomAlert('Silakan masukkan Google Client ID terlebih dahulu dan klik "Simpan ID".');
+      showCustomAlert('Silakan masukkan Google Client ID terlebih dahulu.');
       return;
     }
+    isSigningIn = true; // Set flag to trigger cloud data check/download
     googleSync.connect();
   });
 
   // Disconnect Google Account
   btnDisconnect.addEventListener('click', () => {
+    localStorage.removeItem('user_mode');
+    localStorage.removeItem('google_connected');
     googleSync.disconnect();
+    
+    const loginOverlay = document.getElementById('login-overlay');
+    if (loginOverlay) {
+      loginOverlay.style.display = 'flex';
+      setTimeout(() => {
+        loginOverlay.classList.remove('hidden');
+      }, 50);
+    }
   });
 
   // Manual Upload
@@ -2009,6 +2051,7 @@ async function updateGoogleSyncUI() {
   const userPicEl = document.getElementById('google-user-pic');
   const lastSyncEl = document.getElementById('google-last-sync');
   const autoSyncToggle = document.getElementById('google-auto-sync-toggle');
+  const loginOverlay = document.getElementById('login-overlay');
 
   if (!disconnectState) return;
 
@@ -2025,10 +2068,83 @@ async function updateGoogleSyncUI() {
       userEmailEl.textContent = user.email || '';
       userPicEl.src = user.picture || 'https://lh3.googleusercontent.com/a/default-user=s48';
     }
+
+    // Hide login overlay if visible
+    if (loginOverlay && !loginOverlay.classList.contains('hidden')) {
+      localStorage.setItem('user_mode', 'google'); // Set preference to google
+      if (isSigningIn) {
+        // Show loading state while checking Google Drive
+        const loginBox = loginOverlay.querySelector('.login-box');
+        const originalContent = loginBox.innerHTML;
+        loginBox.innerHTML = `
+          <div class="login-logo-container" style="margin-bottom: 2rem;">
+            <div class="login-logo-icon">IP</div>
+            <div class="login-logo-text">IPO HUB</div>
+          </div>
+          <div style="margin: 2.5rem 0; text-align: center;">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem;"></i>
+            <p style="font-weight: 600; font-size: 1rem; color: #fff;">Memeriksa data di Google Drive...</p>
+          </div>
+        `;
+
+        try {
+          const status = await googleSync.getCloudStatus();
+          if (status.cloudFile) {
+            // Backup found, download and restore
+            const data = await googleSync.downloadData();
+            if (data && (data.nominees || data.stocks || data.orders)) {
+              db.saveDB(data);
+              refreshAll();
+              localStorage.setItem('google_last_sync_time', new Date().toISOString());
+              console.log('Restored cloud backup on login screen.');
+            }
+          } else {
+            // No backup found, upload current local database as initial backup
+            const currentDB = db.getDB();
+            if (currentDB.nominees.length > 0 || currentDB.stocks.length > 0) {
+              await googleSync.uploadData(currentDB);
+              localStorage.setItem('google_last_sync_time', new Date().toISOString());
+              console.log('Created initial cloud backup.');
+            }
+          }
+        } catch (e) {
+          console.warn('Initial cloud sync error:', e);
+        } finally {
+          loginOverlay.classList.add('hidden');
+          isSigningIn = false;
+          setTimeout(() => {
+            loginOverlay.style.display = 'none'; // Hide completely
+            loginBox.innerHTML = originalContent;
+            bindLoginOverlayButtons();
+          }, 500);
+        }
+      } else {
+        // Just hide the overlay instantly if already logged in on startup
+        loginOverlay.classList.add('hidden');
+        loginOverlay.style.display = 'none'; // Hide completely
+      }
+    }
   } else {
-    disconnectState.style.display = 'block';
+    disconnectState.style.display = 'none'; // Hide disconnect details
     connectedState.style.display = 'none';
     syncControls.style.display = 'none';
+
+    // Show login overlay if not connected AND not guest
+    const userMode = localStorage.getItem('user_mode');
+    if (userMode !== 'guest') {
+      if (loginOverlay && loginOverlay.classList.contains('hidden')) {
+        loginOverlay.style.display = 'flex';
+        setTimeout(() => {
+          loginOverlay.classList.remove('hidden');
+        }, 50);
+      }
+    } else {
+      // If guest mode is active, make sure overlay is hidden
+      if (loginOverlay) {
+        loginOverlay.classList.add('hidden');
+        loginOverlay.style.display = 'none';
+      }
+    }
   }
 
   // Last Sync display formatting
