@@ -81,8 +81,8 @@ function initAllCurrencyInputs() {
 let currentTab = 'dashboard';
 let profitChart = null;
 
-// DOMContentLoaded initialization
-document.addEventListener('DOMContentLoaded', () => {
+// App initialization function
+function initApp() {
   // db is loaded globally from js/db.js
   if (typeof db !== 'undefined') {
     db.initDB();
@@ -114,7 +114,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize Currency Input Masking
   initAllCurrencyInputs();
-});
+}
+
+// Run initialization immediately if the document has already loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
+
 
 // Refresh all UI elements
 function refreshAll() {

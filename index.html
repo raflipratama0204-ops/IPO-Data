@@ -878,27 +878,60 @@
     </div>
   </div>
 
-  <!-- Main Application Logic Scripts -->
-  <script src="js/db.js?v=1.1"></script>
-  <script src="js/app.js?v=1.1"></script>
+  <!-- Main Application Logic Scripts with Root Directory Fallback -->
   <script>
-    if (typeof db === 'undefined' || typeof refreshAll === 'undefined') {
-      const errDiv = document.createElement('div');
-      errDiv.style.position = 'fixed';
-      errDiv.style.top = '0';
-      errDiv.style.left = '0';
-      errDiv.style.width = '100%';
-      errDiv.style.background = 'rgba(220, 38, 38, 0.95)';
-      errDiv.style.color = '#ffffff';
-      errDiv.style.padding = '12px';
-      errDiv.style.zIndex = '999999';
-      errDiv.style.fontSize = '14px';
-      errDiv.style.fontFamily = 'sans-serif';
-      errDiv.style.textAlign = 'center';
-      errDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
-      errDiv.innerHTML = '<strong>PENTING:</strong> Berkas logika (<code>js/db.js</code> atau <code>js/app.js</code>) gagal dimuat! Pastikan folder <code>js</code> beserta isinya sudah diunggah ke hosting Anda di tempat yang benar.';
-      document.body.appendChild(errDiv);
-    }
+    (function() {
+      function loadScript(src, callback, fallbackSrc) {
+        var script = document.createElement('script');
+        script.src = src;
+        script.onload = function() {
+          callback(true);
+        };
+        script.onerror = function() {
+          if (fallbackSrc) {
+            console.warn('Gagal memuat ' + src + ', mencoba memuat dari direktori utama: ' + fallbackSrc);
+            var fallbackScript = document.createElement('script');
+            fallbackScript.src = fallbackSrc;
+            fallbackScript.onload = function() {
+              callback(true);
+            };
+            fallbackScript.onerror = function() {
+              console.error('Gagal memuat berkas fallback: ' + fallbackSrc);
+              callback(false);
+            };
+            document.body.appendChild(fallbackScript);
+          } else {
+            console.error('Gagal memuat berkas: ' + src);
+            callback(false);
+          }
+        };
+        document.body.appendChild(script);
+      }
+
+      // Memuat db.js terlebih dahulu, setelah selesai baru memuat app.js
+      loadScript('js/db.js?v=1.1', function(dbSuccess) {
+        loadScript('js/app.js?v=1.1', function(appSuccess) {
+          // Cek apakah database dan fungsi utama berhasil dimuat
+          if (typeof db === 'undefined' || typeof refreshAll === 'undefined') {
+            const errDiv = document.createElement('div');
+            errDiv.style.position = 'fixed';
+            errDiv.style.top = '0';
+            errDiv.style.left = '0';
+            errDiv.style.width = '100%';
+            errDiv.style.background = 'rgba(220, 38, 38, 0.95)';
+            errDiv.style.color = '#ffffff';
+            errDiv.style.padding = '12px';
+            errDiv.style.zIndex = '999999';
+            errDiv.style.fontSize = '14px';
+            errDiv.style.fontFamily = 'sans-serif';
+            errDiv.style.textAlign = 'center';
+            errDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
+            errDiv.innerHTML = '<strong>PENTING:</strong> Berkas logika (<code>db.js</code> atau <code>app.js</code>) gagal dimuat dari folder <code>js/</code> maupun direktori utama! Pastikan berkas-berkas tersebut sudah diunggah ke hosting Anda.';
+            document.body.appendChild(errDiv);
+          }
+        }, 'app.js?v=1.1');
+      }, 'db.js?v=1.1');
+    })();
   </script>
 </body>
 </html>
