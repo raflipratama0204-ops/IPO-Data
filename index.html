@@ -1007,9 +1007,9 @@
         document.body.appendChild(script);
       }
       // Memuat db.js terlebih dahulu, setelah selesai memuat google-sync.js, kemudian memuat app.js
-      loadScript('js/db.js?v=1.1', function(dbSuccess) {
-        loadScript('js/google-sync.js?v=1.1', function(syncSuccess) {
-          loadScript('js/app.js?v=1.1', function(appSuccess) {
+      loadScript('js/db.js?v=1.2', function(dbSuccess) {
+        loadScript('js/google-sync.js?v=1.2', function(syncSuccess) {
+          loadScript('js/app.js?v=1.2', function(appSuccess) {
             // Cek apakah database, googleSync, dan fungsi utama berhasil dimuat
             if (typeof db === 'undefined' || typeof googleSync === 'undefined' || typeof refreshAll === 'undefined') {
               const errDiv = document.createElement('div');
@@ -1028,9 +1028,9 @@
               errDiv.innerHTML = '<strong>PENTING:</strong> Berkas logika (<code>db.js</code>, <code>google-sync.js</code>, atau <code>app.js</code>) gagal dimuat! Pastikan berkas-berkas tersebut sudah diunggah ke hosting Anda.';
               document.body.appendChild(errDiv);
             }
-          }, 'app.js?v=1.1');
-        }, 'google-sync.js?v=1.1');
-      }, 'db.js?v=1.1');
+          }, 'app.js?v=1.2');
+        }, 'google-sync.js?v=1.2');
+      }, 'db.js?v=1.2');
     })();
   </script>
 </body>
