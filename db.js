@@ -125,6 +125,7 @@
       id: generateUUID(),
       code: stock.code.toUpperCase(),
       name: stock.name,
+      underwriter: stock.underwriter || '',
       ipoPrice: parseCurrency(stock.ipoPrice),
       offeringDate: stock.offeringDate || '',
       listingDate: stock.listingDate || '',
@@ -459,6 +460,7 @@
     let totalRefundValue = 0;
     let totalSellValue = 0;
     let totalProfit = 0;
+    let totalSoldAllottedCost = 0;
     let activeNomineesCount = new Set(stockOrders.map(o => o.nomineeId)).size;
     let ordersCount = stockOrders.length;
 
@@ -480,9 +482,12 @@
           const exchangeFee = o.sellExchangeFee || 0;
           totalSellValue += sellVal;
           totalProfit += (sellVal - allottedVal - brokerFee - exchangeFee);
+          totalSoldAllottedCost += allottedVal;
         }
       }
     });
+
+    const profitPercentage = totalSoldAllottedCost > 0 ? (totalProfit / totalSoldAllottedCost) * 100 : 0;
 
     return {
       ...stock,
@@ -493,6 +498,7 @@
       totalRefundValue,
       totalSellValue,
       totalProfit,
+      profitPercentage,
       activeNomineesCount,
       ordersCount
     };
@@ -557,6 +563,7 @@
           id: "stock-1",
           code: "ADRO",
           name: "Adaro Energy Indonesia Tbk",
+          underwriter: "Ciptadana Sekuritas",
           ipoPrice: 3250,
           offeringDate: "2026-06-01",
           listingDate: "2026-06-15",
@@ -567,6 +574,7 @@
           id: "stock-2",
           code: "BUMI",
           name: "Bumi Resources Tbk",
+          underwriter: "Samuel Sekuritas",
           ipoPrice: 150,
           offeringDate: "2026-06-18",
           listingDate: "2026-06-28",
@@ -577,6 +585,7 @@
           id: "stock-3",
           code: "GOTO",
           name: "GoTo Gojek Tokopedia Tbk",
+          underwriter: "Indo Premier Sekuritas",
           ipoPrice: 338,
           offeringDate: "2026-07-02",
           listingDate: "2026-07-15",

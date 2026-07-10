@@ -321,7 +321,8 @@ function openNomineeModal(nominee = null) {
   openModal('modal-nominee');
 }
 
-function openStockModal(stock = null) {
+function openStockModal(stock) {
+  if (stock === undefined) stock = null;
   const form = document.getElementById('form-stock');
   form.reset();
   
@@ -333,6 +334,7 @@ function openStockModal(stock = null) {
     idInput.value = stock.id;
     document.getElementById('stock-code').value = stock.code;
     document.getElementById('stock-name').value = stock.name;
+    document.getElementById('stock-underwriter').value = stock.underwriter || '';
     document.getElementById('stock-price').value = stock.ipoPrice;
     document.getElementById('stock-offering-date').value = stock.offeringDate;
     document.getElementById('stock-listing-date').value = stock.listingDate;
@@ -861,15 +863,16 @@ function setupForms() {
     const id = document.getElementById('stock-id').value;
     const code = document.getElementById('stock-code').value;
     const name = document.getElementById('stock-name').value;
+    const underwriter = document.getElementById('stock-underwriter').value;
     const ipoPrice = document.getElementById('stock-price').value;
     const offeringDate = document.getElementById('stock-offering-date').value;
     const listingDate = document.getElementById('stock-listing-date').value;
     const status = document.getElementById('stock-status').value;
     
     if (id) {
-      db.updateStock(id, { code, name, ipoPrice, offeringDate, listingDate, status });
+      db.updateStock(id, { code, name, underwriter, ipoPrice, offeringDate, listingDate, status });
     } else {
-      db.addStock({ code, name, ipoPrice, offeringDate, listingDate, status });
+      db.addStock({ code, name, underwriter, ipoPrice, offeringDate, listingDate, status });
     }
     
     closeModal('modal-stock');
@@ -1191,7 +1194,15 @@ function renderDashboard() {
 }
 
 function renderProfitChart() {
-  const ctx = document.getElementById('chart-stock-profits').getContext('2d');
+  const canvas = document.getElementById('chart-stock-profits');
+  if (!canvas) return;
+  
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js is not loaded. Skipping chart rendering.');
+    return;
+  }
+  
+  const ctx = canvas.getContext('2d');
   
   if (profitChart) {
     profitChart.destroy();
@@ -1410,15 +1421,28 @@ function renderStocks() {
     const stats = db.getStockStats(s.id);
     const profitClass = stats.totalProfit > 0 ? 'text-profit' : stats.totalProfit < 0 ? 'text-loss' : '';
     
+    // Format underwriter info below stock name
+    const underwriterHtml = s.underwriter 
+      ? `<br><span style="font-size: 0.72rem; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;"><i class="fa-solid fa-building-shield"></i> ${s.underwriter}</span>` 
+      : '';
+      
+    // Format profit percentage badge
+    let profitPctHtml = '';
+    if (stats.profitPercentage !== undefined && stats.profitPercentage !== 0) {
+      const pctSign = stats.profitPercentage >= 0 ? '+' : '';
+      const badgeClass = stats.profitPercentage >= 0 ? 'badge-success' : 'badge-danger';
+      profitPctHtml = `<br><span class="badge ${badgeClass}" style="font-size: 0.65rem; padding: 2px 6px; margin-top: 4px; display: inline-block; font-weight: 700; border-radius: 4px;">${pctSign}${stats.profitPercentage.toFixed(2)}%</span>`;
+    }
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><strong>${s.code}</strong></td>
-      <td>${s.name}</td>
+      <td><strong>${s.name}</strong>${underwriterHtml}</td>
       <td class="text-right">${formatRupiah(s.ipoPrice)}</td>
       <td>${s.listingDate || '-'}</td>
       <td>${badgeMap[s.status] || s.status}</td>
       <td class="text-right">${stats.totalOrderedLots} Lot<br><span style="font-size: 0.75rem; color: var(--text-muted);">${formatRupiah(stats.totalOrderedValue)}</span></td>
-      <td class="text-right ${profitClass}">${formatRupiah(stats.totalProfit)}</td>
+      <td class="text-right ${profitClass}"><strong>${formatRupiah(stats.totalProfit)}</strong>${profitPctHtml}</td>
       <td>
         <button class="btn btn-secondary btn-sm" id="btn-edit-stk-${s.id}"><i class="fa-solid fa-pen"></i></button>
         <button class="btn btn-danger btn-sm" id="btn-del-stk-${s.id}"><i class="fa-solid fa-trash"></i></button>
@@ -1815,6 +1839,51 @@ function renderDebts() {
 
 // ================= CUSTOM POPUPS & MODALS =================
 
+function showCustomToast(message, type) {
+  if (type === undefined) type = 'info';
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  
+  let iconHtml = '<i class="fa-solid fa-circle-info text-primary"></i>';
+  if (type === 'success') {
+    iconHtml = '<i class="fa-solid fa-circle-check" style="color: #10b981;"></i>';
+  } else if (type === 'warning') {
+    iconHtml = '<i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b;"></i>';
+  } else if (type === 'error') {
+    iconHtml = '<i class="fa-solid fa-circle-xmark" style="color: #ef4444;"></i>';
+  }
+
+  toast.innerHTML = `
+    <div class="toast-icon">${iconHtml}</div>
+    <div class="toast-content">${message}</div>
+    <button class="toast-close">&times;</button>
+  `;
+
+  // Close event listener
+  toast.querySelector('.toast-close').addEventListener('click', () => {
+    toast.classList.add('toast-fade-out');
+    setTimeout(() => toast.remove(), 300);
+  });
+
+  container.appendChild(toast);
+
+  // Auto-remove after 4 seconds
+  setTimeout(() => {
+    if (toast.parentNode) {
+      toast.classList.add('toast-fade-out');
+      setTimeout(() => toast.remove(), 300);
+    }
+  }, 4000);
+}
+
 function showCustomAlert(message) {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
@@ -1856,7 +1925,8 @@ function showCustomAlert(message) {
   });
 }
 
-function showCustomConfirm(message, confirmTitle = 'Konfirmasi Aksi') {
+function showCustomConfirm(message, confirmTitle) {
+  if (confirmTitle === undefined) confirmTitle = 'Konfirmasi Aksi';
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
     overlay.className = 'modal-backdrop active';
@@ -1907,6 +1977,47 @@ function showCustomConfirm(message, confirmTitle = 'Konfirmasi Aksi') {
 
 // ----------------- GOOGLE DRIVE SYNC HANDLERS -----------------
 let isSigningIn = false;
+let syncPollInterval = null;
+
+function startGoogleSyncPolling() {
+  if (typeof googleSync === 'undefined') return;
+  if (syncPollInterval) clearInterval(syncPollInterval);
+  
+  syncPollInterval = setInterval(async () => {
+    // Only poll if connected and sync is enabled
+    if (!googleSync.isConnected() || !googleSync.isSyncEnabled()) return;
+    
+    try {
+      const status = await googleSync.getCloudStatus();
+      if (status.cloudFile && status.cloudFile.modifiedTime) {
+        const cloudModifiedTime = new Date(status.cloudFile.modifiedTime).getTime();
+        
+        // Retrieve last sync time
+        const lastSyncTimeStr = localStorage.getItem('google_last_sync_time');
+        const lastSyncTime = lastSyncTimeStr ? new Date(lastSyncTimeStr).getTime() : 0;
+        
+        // If cloud file is newer by at least 2 seconds (buffer for network delays)
+        if (cloudModifiedTime > lastSyncTime + 2000) {
+          console.log('Menemukan data awan baru di Google Drive. Memulai sinkronisasi otomatis ke lokal...');
+          const data = await googleSync.downloadData();
+          if (data && (data.nominees || data.stocks || data.orders)) {
+            // Save to DB and refresh UI
+            db.saveDB(data);
+            refreshAll();
+            
+            // Save the exact modified time from cloud as our last sync time!
+            localStorage.setItem('google_last_sync_time', status.cloudFile.modifiedTime);
+            updateGoogleSyncUI();
+            
+            showCustomToast('Data portofolio diperbarui dari Cloud!', 'success');
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Realtime polling background sync error:', e);
+    }
+  }, 12000); // Check every 12 seconds
+}
 
 function showDashboard() {
   const tempStyle = document.getElementById('temp-hide-app');
@@ -1933,6 +2044,10 @@ function bindLoginOverlayButtons() {
     });
 
     btnLoginGoogle.addEventListener('click', () => {
+      if (typeof googleSync === 'undefined') {
+        showCustomAlert('Fitur sinkronisasi Google gagal dimuat. Harap periksa apakah berkas google-sync.js sudah diunggah.');
+        return;
+      }
       const id = googleSync.getClientId();
       if (!id) {
         showCustomAlert('Google Client ID tidak dikonfigurasi. Periksa berkas google-sync.js.');
@@ -1945,6 +2060,14 @@ function bindLoginOverlayButtons() {
 }
 
 function setupGoogleSync() {
+  // Bind login overlay buttons first (so Guest mode always works!)
+  bindLoginOverlayButtons();
+
+  if (typeof googleSync === 'undefined') {
+    console.warn('googleSync module is not loaded. Google Drive Sync features are disabled.');
+    return;
+  }
+
   const btnSaveId = document.getElementById('btn-save-client-id');
   const inputClientId = document.getElementById('google-client-id');
   const btnConnect = document.getElementById('btn-google-connect');
@@ -1960,9 +2083,6 @@ function setupGoogleSync() {
 
   // Bind status callback
   googleSync.registerStatusCallback(updateGoogleSyncUI);
-
-  // Bind login overlay buttons
-  bindLoginOverlayButtons();
 
   // Initialize GIS client and check session
   googleSync.init((status) => {
@@ -1996,6 +2116,10 @@ function setupGoogleSync() {
     btnDisconnect.addEventListener('click', () => {
       localStorage.removeItem('user_mode');
       localStorage.removeItem('google_connected');
+      if (syncPollInterval) {
+        clearInterval(syncPollInterval);
+        syncPollInterval = null;
+      }
       googleSync.disconnect();
       
       const loginOverlay = document.getElementById('login-overlay');
@@ -2069,9 +2193,13 @@ function setupGoogleSync() {
       googleSync.setSyncEnabled(e.target.checked);
     });
   }
+
+  // Start background sync polling check
+  startGoogleSyncPolling();
 }
 
 async function updateGoogleSyncUI() {
+  if (typeof googleSync === 'undefined') return;
   const disconnectState = document.getElementById('google-disconnected-state');
   const connectedState = document.getElementById('google-connected-state');
   const syncControls = document.getElementById('google-sync-controls');

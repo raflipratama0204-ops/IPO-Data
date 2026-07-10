@@ -1091,6 +1091,168 @@ textarea {
   .nominee-grid {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
   }
+
+  /* Scale down page titles on mobile */
+  .header-title h1 {
+    font-size: 1.3rem !important;
+  }
+  .header-title p {
+    font-size: 0.75rem !important;
+    margin-top: 0.1rem !important;
+    line-height: 1.35 !important;
+  }
+
+  /* Make tab contents smaller & more compact */
+  .glass-card {
+    padding: 0.85rem !important;
+  }
+  
+  .badge {
+    font-size: 0.65rem !important;
+    padding: 0.15rem 0.4rem !important;
+  }
+  
+  .btn-sm {
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Responsive Tables as Cards */
+  .table-container {
+    overflow-x: visible !important;
+  }
+  
+  .table-container table, 
+  .table-container tbody {
+    display: block !important;
+    width: 100% !important;
+  }
+  
+  .table-container thead {
+    display: none !important; /* Hide headers */
+  }
+  
+  .table-container tr:not(.nominee-group-header) {
+    display: block !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: var(--radius-md) !important;
+    background: rgba(255, 255, 255, 0.01) !important;
+    margin-bottom: 0.75rem !important;
+    padding: 0.5rem !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+  }
+  
+  .table-container tr:not(.nominee-group-header) td {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    border: none !important;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.05) !important;
+    position: relative !important;
+    padding: 0.5rem 0.25rem !important;
+    padding-left: 45% !important;
+    text-align: right !important;
+    font-size: 0.78rem !important;
+    min-height: 2rem !important;
+  }
+  
+  .table-container tr:not(.nominee-group-header) td:last-child {
+    border-bottom: none !important;
+  }
+  
+  /* Labels on the left side of cards */
+  .table-container tr:not(.nominee-group-header) td:before {
+    position: absolute !important;
+    top: 50% !important;
+    left: 8px !important;
+    transform: translateY(-50%) !important;
+    width: 40% !important;
+    text-align: left !important;
+    font-weight: 600 !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.72rem !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+  
+  /* Reset center alignments for empty/no-data rows */
+  .table-container tr:not(.nominee-group-header) td[colspan] {
+    padding-left: 0.5rem !important;
+    justify-content: center !important;
+    text-align: center !important;
+    color: var(--text-secondary) !important;
+  }
+  
+  .table-container tr:not(.nominee-group-header) td[colspan]:before {
+    display: none !important;
+  }
+  
+  /* Transactions Table Labels */
+  #list-transactions td:nth-of-type(1):before { content: "Tanggal" !important; }
+  #list-transactions td:nth-of-type(2):before { content: "Nominee" !important; }
+  #list-transactions td:nth-of-type(3):before { content: "Jenis" !important; }
+  #list-transactions td:nth-of-type(4):before { content: "Jumlah" !important; }
+  #list-transactions td:nth-of-type(5):before { content: "Catatan" !important; }
+  #list-transactions td:nth-of-type(6):before { content: "Aksi" !important; }
+  
+  /* Stocks Table Labels */
+  #list-stocks td:nth-of-type(1):before { content: "Kode" !important; }
+  #list-stocks td:nth-of-type(2):before { content: "Perusahaan" !important; }
+  #list-stocks td:nth-of-type(3):before { content: "Harga IPO" !important; }
+  #list-stocks td:nth-of-type(4):before { content: "Tgl Listing" !important; }
+  #list-stocks td:nth-of-type(5):before { content: "Status" !important; }
+  #list-stocks td:nth-of-type(6):before { content: "Total Pesan" !important; }
+  #list-stocks td:nth-of-type(7):before { content: "Total Untung" !important; }
+  #list-stocks td:nth-of-type(8):before { content: "Aksi" !important; }
+
+  /* Debts Table Labels */
+  #list-debts td:nth-of-type(1):before { content: "Tgl Pinjam" !important; }
+  #list-debts td:nth-of-type(2):before { content: "Kreditur" !important; }
+  #list-debts td:nth-of-type(3):before { content: "Jumlah" !important; }
+  #list-debts td:nth-of-type(4):before { content: "Telah Dibayar" !important; }
+  #list-debts td:nth-of-type(5):before { content: "Sisa Hutang" !important; }
+  #list-debts td:nth-of-type(6):before { content: "Status" !important; }
+  #list-debts td:nth-of-type(7):before { content: "Keterangan" !important; }
+  #list-debts td:nth-of-type(8):before { content: "Aksi" !important; }
+
+  /* Orders Table Labels */
+  #list-orders tr:not(.nominee-group-header) td:nth-of-type(1):before { content: "Info/Akun" !important; }
+  #list-orders tr:not(.nominee-group-header) td:nth-of-type(2):before { content: "Saham" !important; }
+  #list-orders tr:not(.nominee-group-header) td:nth-of-type(3):before { content: "Pesan (Lot)" !important; }
+  #list-orders tr:not(.nominee-group-header) td:nth-of-type(4):before { content: "Dana Pesan" !important; }
+  #list-orders tr:not(.nominee-group-header) td:nth-of-type(5):before { content: "Jatah (Lot)" !important; }
+  #list-orders tr:not(.nominee-group-header) td:nth-of-type(6):before { content: "Refund" !important; }
+  #list-orders tr:not(.nominee-group-header) td:nth-of-type(7):before { content: "Harga Jual" !important; }
+  #list-orders tr:not(.nominee-group-header) td:nth-of-type(8):before { content: "Keuntungan" !important; }
+  #list-orders tr:not(.nominee-group-header) td:nth-of-type(9):before { content: "Status" !important; }
+  #list-orders tr:not(.nominee-group-header) td:nth-of-type(10):before { content: "Aksi" !important; }
+
+  /* Group header custom mobile card layout */
+  .nominee-group-header {
+    display: block !important;
+    margin-top: 1rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .nominee-group-header td {
+    display: block !important;
+    width: 100% !important;
+    padding: 0.65rem 0.85rem !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: var(--radius-md) !important;
+  }
+  
+  .nominee-group-content {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.35rem !important;
+  }
+  
+  .nominee-group-summary {
+    font-size: 0.72rem !important;
+    opacity: 0.85 !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1435,5 +1597,94 @@ input:checked + .slider:before {
   line-height: 1.4;
   color: var(--text-muted);
 }
+
+/* ================= TOAST NOTIFICATION ================= */
+.toast-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 99999999;
+  pointer-events: none;
+}
+
+.toast {
+  min-width: 280px;
+  max-width: 360px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glow-shadow);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  color: var(--text-primary);
+  padding: 0.85rem 1.15rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  pointer-events: auto;
+  animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  border-left: 4px solid var(--primary);
+}
+
+.toast.toast-info {
+  border-left-color: var(--primary);
+}
+
+.toast.toast-success {
+  border-left-color: #10b981;
+}
+
+.toast.toast-warning {
+  border-left-color: #f59e0b;
+}
+
+.toast.toast-error {
+  border-left-color: #ef4444;
+}
+
+.toast-icon {
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-content {
+  flex: 1;
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.2rem;
+  line-height: 1;
+  transition: var(--transition);
+}
+
+.toast-close:hover {
+  color: var(--text-primary);
+}
+
+@keyframes toastSlideIn {
+  0% { transform: translateY(20px) translateX(20px); opacity: 0; }
+  100% { transform: translateY(0) translateX(0); opacity: 1; }
+}
+
+.toast.toast-fade-out {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
 
 
