@@ -1023,47 +1023,59 @@ function setupForms() {
   });
 
   // Import Form
-  document.getElementById('form-import').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const jsonStr = document.getElementById('import-json-data').value;
-    const success = db.importDatabase(jsonStr);
-    
-    if (success) {
-      await showCustomAlert('Database berhasil diimpor!');
-      closeModal('modal-import');
-      refreshAll();
-    } else {
-      await showCustomAlert('Format backup JSON tidak valid! Silakan cek kembali.');
-    }
-  });
+  const formImport = document.getElementById('form-import');
+  if (formImport) {
+    formImport.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const jsonStr = document.getElementById('import-json-data').value;
+      const success = db.importDatabase(jsonStr);
+      
+      if (success) {
+        await showCustomAlert('Database berhasil diimpor!');
+        closeModal('modal-import');
+        refreshAll();
+      } else {
+        await showCustomAlert('Format backup JSON tidak valid! Silakan cek kembali.');
+      }
+    });
+  }
 }
 
 // ----------------- BACKUP & DEMO HANDLERS -----------------
 function setupBackupHandlers() {
-  document.getElementById('btn-seed-data').addEventListener('click', async () => {
-    const isConfirmed = await showCustomConfirm('Apakah Anda ingin memuat data demo? Ini akan menimpa data yang ada saat ini.', 'Muat Data Demo');
-    if (isConfirmed) {
-      db.seedDatabase();
-      refreshAll();
-      await showCustomAlert('Data demo berhasil dimuat!');
-    }
-  });
+  const btnSeed = document.getElementById('btn-seed-data');
+  if (btnSeed) {
+    btnSeed.addEventListener('click', async () => {
+      const isConfirmed = await showCustomConfirm('Apakah Anda ingin memuat data demo? Ini akan menimpa data yang ada saat ini.', 'Muat Data Demo');
+      if (isConfirmed) {
+        db.seedDatabase();
+        refreshAll();
+        await showCustomAlert('Data demo berhasil dimuat!');
+      }
+    });
+  }
 
-  document.getElementById('btn-export-db').addEventListener('click', () => {
-    const dataStr = db.exportDatabase();
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const exportFileDefaultName = `ipo_hub_backup_${new Date().toISOString().split('T')[0]}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-  });
+  const btnExport = document.getElementById('btn-export-db');
+  if (btnExport) {
+    btnExport.addEventListener('click', () => {
+      const dataStr = db.exportDatabase();
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      const exportFileDefaultName = `ipo_hub_backup_${new Date().toISOString().split('T')[0]}.json`;
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+    });
+  }
 
-  document.getElementById('btn-import-db').addEventListener('click', () => {
-    document.getElementById('form-import').reset();
-    openModal('modal-import');
-  });
+  const btnImport = document.getElementById('btn-import-db');
+  if (btnImport) {
+    btnImport.addEventListener('click', () => {
+      document.getElementById('form-import').reset();
+      openModal('modal-import');
+    });
+  }
 }
 
 // ----------------- SEARCH & FILTERS -----------------
@@ -1896,6 +1908,15 @@ function showCustomConfirm(message, confirmTitle = 'Konfirmasi Aksi') {
 // ----------------- GOOGLE DRIVE SYNC HANDLERS -----------------
 let isSigningIn = false;
 
+function showDashboard() {
+  const tempStyle = document.getElementById('temp-hide-app');
+  if (tempStyle) tempStyle.remove();
+  // Ensure chart adjusts to the newly shown container
+  setTimeout(() => {
+    window.dispatchEvent(new Event('resize'));
+  }, 50);
+}
+
 function bindLoginOverlayButtons() {
   const btnLoginGoogle = document.getElementById('btn-login-google');
   const btnLoginGuest = document.getElementById('btn-login-guest');
@@ -1905,6 +1926,7 @@ function bindLoginOverlayButtons() {
     btnLoginGuest.addEventListener('click', () => {
       localStorage.setItem('user_mode', 'guest');
       loginOverlay.classList.add('hidden');
+      showDashboard(); // Reveal dashboard
       setTimeout(() => {
         loginOverlay.style.display = 'none';
       }, 400); // Wait for transition
@@ -1931,10 +1953,10 @@ function setupGoogleSync() {
   const btnDownload = document.getElementById('btn-google-download');
   const toggleAuto = document.getElementById('google-auto-sync-toggle');
 
-  if (!inputClientId) return; // Prevent errors if UI is not fully present
-
-  // Load saved client ID
-  inputClientId.value = googleSync.getClientId();
+  // Load saved client ID if elements exist
+  if (inputClientId) {
+    inputClientId.value = googleSync.getClientId();
+  }
 
   // Bind status callback
   googleSync.registerStatusCallback(updateGoogleSyncUI);
@@ -1948,98 +1970,105 @@ function setupGoogleSync() {
     updateGoogleSyncUI();
   });
 
-  // Save Client ID
-  btnSaveId.addEventListener('click', () => {
-    const id = inputClientId.value.trim();
-    if (!id) {
-      showCustomAlert('Silakan masukkan Client ID yang valid.');
-      return;
-    }
-    googleSync.saveClientId(id);
-    showCustomAlert('Google Client ID berhasil disimpan dan diinisialisasi.');
-  });
+  // Save Client ID handler (if UI exists)
+  if (btnSaveId && inputClientId) {
+    btnSaveId.addEventListener('click', () => {
+      const id = inputClientId.value.trim();
+      if (!id) {
+        showCustomAlert('Silakan masukkan Client ID yang valid.');
+        return;
+      }
+      googleSync.saveClientId(id);
+      showCustomAlert('Google Client ID berhasil disimpan and diinisialisasi.');
+    });
+  }
 
   // Connect Google Account
-  btnConnect.addEventListener('click', () => {
-    const id = inputClientId.value.trim();
-    if (!id) {
-      showCustomAlert('Silakan masukkan Google Client ID terlebih dahulu.');
-      return;
-    }
-    isSigningIn = true; // Set flag to trigger cloud data check/download
-    googleSync.connect();
-  });
+  if (btnConnect) {
+    btnConnect.addEventListener('click', () => {
+      isSigningIn = true; // Set flag to trigger cloud data check/download
+      googleSync.connect();
+    });
+  }
 
   // Disconnect Google Account
-  btnDisconnect.addEventListener('click', () => {
-    localStorage.removeItem('user_mode');
-    localStorage.removeItem('google_connected');
-    googleSync.disconnect();
-    
-    const loginOverlay = document.getElementById('login-overlay');
-    if (loginOverlay) {
-      loginOverlay.style.display = 'flex';
-      setTimeout(() => {
-        loginOverlay.classList.remove('hidden');
-      }, 50);
-    }
-  });
+  if (btnDisconnect) {
+    btnDisconnect.addEventListener('click', () => {
+      localStorage.removeItem('user_mode');
+      localStorage.removeItem('google_connected');
+      googleSync.disconnect();
+      
+      const loginOverlay = document.getElementById('login-overlay');
+      if (loginOverlay) {
+        loginOverlay.style.display = 'flex';
+        setTimeout(() => {
+          loginOverlay.classList.remove('hidden');
+        }, 50);
+      }
+    });
+  }
 
   // Manual Upload
-  btnUpload.addEventListener('click', async () => {
-    btnUpload.disabled = true;
-    const originalHtml = btnUpload.innerHTML;
-    btnUpload.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengunggah...';
-    try {
-      const dbData = db.getDB();
-      await googleSync.uploadData(dbData);
-      localStorage.setItem('google_last_sync_time', new Date().toISOString());
-      updateGoogleSyncUI();
-      showCustomAlert('Database berhasil diunggah ke Google Drive.');
-    } catch (err) {
-      console.error(err);
-      showCustomAlert('Gagal mengunggah data: ' + err.message);
-    } finally {
-      btnUpload.disabled = false;
-      btnUpload.innerHTML = originalHtml;
-    }
-  });
-
-  // Manual Download
-  btnDownload.addEventListener('click', async () => {
-    const confirmText = 'Apakah Anda yakin ingin mengunduh data dari Cloud? Data lokal saat ini akan DITIMPA secara keseluruhan. Silakan lakukan ekspor backup manual terlebih dahulu jika perlu.';
-    const confirm = await showCustomConfirm(confirmText, 'Konfirmasi Unduh Cloud');
-    if (!confirm) return;
-
-    btnDownload.disabled = true;
-    const originalHtml = btnDownload.innerHTML;
-    btnDownload.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengunduh...';
-    try {
-      const data = await googleSync.downloadData();
-      if (data && (data.nominees || data.stocks || data.orders)) {
-        // Save to DB and refresh UI
-        db.saveDB(data);
-        refreshAll();
+  if (btnUpload) {
+    btnUpload.addEventListener('click', async () => {
+      btnUpload.disabled = true;
+      const originalHtml = btnUpload.innerHTML;
+      btnUpload.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengunggah...';
+      try {
+        const dbData = db.getDB();
+        await googleSync.uploadData(dbData);
         localStorage.setItem('google_last_sync_time', new Date().toISOString());
         updateGoogleSyncUI();
-        showCustomAlert('Database berhasil diunduh dan dipulihkan dari Google Drive.');
-      } else {
-        throw new Error('Format berkas tidak valid atau kosong.');
+        showCustomAlert('Database berhasil diunggah ke Google Drive.');
+      } catch (err) {
+        console.error(err);
+        showCustomAlert('Gagal mengunggah data: ' + err.message);
+      } finally {
+        btnUpload.disabled = false;
+        btnUpload.innerHTML = originalHtml;
       }
-    } catch (err) {
-      console.error(err);
-      showCustomAlert('Gagal mengunduh data: ' + err.message);
-    } finally {
-      btnDownload.disabled = false;
-      btnDownload.innerHTML = originalHtml;
-    }
-  });
+    });
+  }
+
+  // Manual Download
+  if (btnDownload) {
+    btnDownload.addEventListener('click', async () => {
+      const confirmText = 'Apakah Anda yakin ingin mengunduh data dari Cloud? Data lokal saat ini akan DITIMPA secara keseluruhan. Silakan lakukan ekspor backup manual terlebih dahulu jika perlu.';
+      const confirm = await showCustomConfirm(confirmText, 'Konfirmasi Unduh Cloud');
+      if (!confirm) return;
+
+      btnDownload.disabled = true;
+      const originalHtml = btnDownload.innerHTML;
+      btnDownload.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengunduh...';
+      try {
+        const data = await googleSync.downloadData();
+        if (data && (data.nominees || data.stocks || data.orders)) {
+          // Save to DB and refresh UI
+          db.saveDB(data);
+          refreshAll();
+          localStorage.setItem('google_last_sync_time', new Date().toISOString());
+          updateGoogleSyncUI();
+          showCustomAlert('Database berhasil diunduh dan dipulihkan dari Google Drive.');
+        } else {
+          throw new Error('Format berkas tidak valid atau kosong.');
+        }
+      } catch (err) {
+        console.error(err);
+        showCustomAlert('Gagal mengunduh data: ' + err.message);
+      } finally {
+        btnDownload.disabled = false;
+        btnDownload.innerHTML = originalHtml;
+      }
+    });
+  }
 
   // Toggle Auto Sync
-  toggleAuto.checked = googleSync.isSyncEnabled();
-  toggleAuto.addEventListener('change', (e) => {
-    googleSync.setSyncEnabled(e.target.checked);
-  });
+  if (toggleAuto) {
+    toggleAuto.checked = googleSync.isSyncEnabled();
+    toggleAuto.addEventListener('change', (e) => {
+      googleSync.setSyncEnabled(e.target.checked);
+    });
+  }
 }
 
 async function updateGoogleSyncUI() {
@@ -2111,6 +2140,7 @@ async function updateGoogleSyncUI() {
           console.warn('Initial cloud sync error:', e);
         } finally {
           loginOverlay.classList.add('hidden');
+          showDashboard(); // Reveal dashboard
           isSigningIn = false;
           setTimeout(() => {
             loginOverlay.style.display = 'none'; // Hide completely
@@ -2122,6 +2152,7 @@ async function updateGoogleSyncUI() {
         // Just hide the overlay instantly if already logged in on startup
         loginOverlay.classList.add('hidden');
         loginOverlay.style.display = 'none'; // Hide completely
+        showDashboard(); // Reveal dashboard
       }
     }
   } else {

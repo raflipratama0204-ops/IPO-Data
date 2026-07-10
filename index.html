@@ -7,7 +7,7 @@
   <title>IPO Account Hub - Database Portofolio Akun</title>
   <!-- Google Fonts & FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css?v=1.4">
+  <link rel="stylesheet" href="styles.css?v=1.8">
   
   <!-- Mobile Home Screen (Add to Home Screen) Icons & Settings -->
   <link rel="icon" type="image/png" href="Logo IPO Tracker.png">
@@ -71,13 +71,19 @@
     </div>
   </div>
   <script>
-    // Sembunyikan layar login secara instan sebelum halaman dirender jika sudah terhubung / mode tamu
+    // Sembunyikan layar login atau dashboard secara instan untuk mencegah kedipan visual
     if (localStorage.getItem('google_connected') === 'true' || localStorage.getItem('user_mode') === 'guest') {
       var overlay = document.getElementById('login-overlay');
       if (overlay) {
         overlay.style.display = 'none';
         overlay.classList.add('hidden');
       }
+    } else {
+      // Jika butuh login, sembunyikan dashboard secara instan sebelum dirender
+      var style = document.createElement('style');
+      style.id = 'temp-hide-app';
+      style.textContent = '.app-container { display: none !important; }';
+      document.head.appendChild(style);
     }
   </script>
 
@@ -155,12 +161,6 @@
         <div class="header-actions">
           <button class="btn btn-secondary" id="btn-seed-data" title="Muat Data Demo untuk Demo">
             <i class="fa-solid fa-database"></i> Data Demo
-          </button>
-          <button class="btn btn-secondary" id="btn-export-db">
-            <i class="fa-solid fa-download"></i> Ekspor Backup
-          </button>
-          <button class="btn btn-secondary" id="btn-import-db">
-            <i class="fa-solid fa-upload"></i> Impor Backup
           </button>
         </div>
       </header>
@@ -474,27 +474,12 @@
             <h2 class="section-title" style="margin: 0;"><i class="fa-solid fa-cloud-arrow-up text-primary"></i> Sinkronisasi Cloud Google Drive</h2>
           </div>
 
-          <!-- Configuration Section -->
-          <div class="form-group" style="margin-bottom: 1.5rem;">
-            <label for="google-client-id" style="font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
-              Google OAuth Client ID
-              <span class="tooltip" title="Dapatkan Client ID dari Google Cloud Console dengan scope drive.appdata"><i class="fa-solid fa-circle-question"></i></span>
-            </label>
-            <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
-              <input type="text" id="google-client-id" placeholder="Masukkan Client ID Google Anda..." style="flex: 1; padding: 0.6rem 0.8rem; border-radius: var(--radius-sm); background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); color: #fff;">
-              <button class="btn btn-secondary" id="btn-save-client-id">Simpan ID</button>
-            </div>
-            <p class="kpi-subtext mt-2" style="font-size: 0.8rem; line-height: 1.4;">
-              * Jika belum punya, buat project di <a href="https://console.cloud.google.com/" target="_blank" style="color: var(--primary); text-decoration: underline;">Google Cloud Console</a>, aktifkan <strong>Google Drive API</strong>, lalu buat <strong>OAuth Client ID</strong> untuk jenis <em>Web Application</em> dengan Authorized JavaScript Origin web Anda (atau <code>http://localhost:8000</code>).
-            </p>
-          </div>
-
           <!-- Connection Status Card -->
           <div class="glass-card" id="google-status-card" style="background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.1); margin-bottom: 1.5rem; padding: 1.25rem;">
             <div id="google-disconnected-state" style="text-align: center; padding: 1rem 0;">
               <i class="fa-solid fa-cloud-slash" style="font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem; display: block;"></i>
               <p style="font-weight: 600; font-size: 1.05rem; margin-bottom: 0.5rem;">Belum Terhubung ke Google Drive</p>
-              <p class="kpi-subtext" style="margin-bottom: 1.25rem;">Simpan Client ID Anda lalu klik tombol di bawah untuk masuk menggunakan akun Google Anda.</p>
+              <p class="kpi-subtext" style="margin-bottom: 1.25rem;">Klik tombol di bawah untuk masuk menggunakan akun Google Anda dan mulai sinkronisasi otomatis.</p>
               <button class="btn btn-primary" id="btn-google-connect">
                 <i class="fa-brands fa-google"></i> Hubungkan Akun Google
               </button>
@@ -990,27 +975,7 @@
     </div>
   </div>
 
-  <!-- DB Import Backup Modal -->
-  <div class="modal-backdrop" id="modal-import">
-    <div class="modal">
-      <div class="modal-header">
-        <h2>Impor Database Backup</h2>
-        <button class="modal-close" data-close="modal-import">&times;</button>
-      </div>
-      <form id="form-import">
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="import-json-data">Tempel Kode Backup JSON</label>
-            <textarea id="import-json-data" style="min-height: 250px; font-family: monospace; font-size: 0.8rem;" required placeholder='Tempelkan string JSON hasil ekspor di sini...'></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-close="modal-import">Batal</button>
-          <button type="submit" class="btn btn-primary">Impor Data</button>
-        </div>
-      </form>
-    </div>
-  </div>
+
 
   <!-- Main Application Logic Scripts with Root Directory Fallback -->
   <script>
@@ -1042,9 +1007,9 @@
         document.body.appendChild(script);
       }
       // Memuat db.js terlebih dahulu, setelah selesai memuat google-sync.js, kemudian memuat app.js
-      loadScript('js/db.js?v=1.4', function(dbSuccess) {
-        loadScript('js/google-sync.js?v=1.4', function(syncSuccess) {
-          loadScript('js/app.js?v=1.4', function(appSuccess) {
+      loadScript('js/db.js?v=1.8', function(dbSuccess) {
+        loadScript('js/google-sync.js?v=1.8', function(syncSuccess) {
+          loadScript('js/app.js?v=1.8', function(appSuccess) {
             // Cek apakah database, googleSync, dan fungsi utama berhasil dimuat
             if (typeof db === 'undefined' || typeof googleSync === 'undefined' || typeof refreshAll === 'undefined') {
               const errDiv = document.createElement('div');
@@ -1063,9 +1028,9 @@
               errDiv.innerHTML = '<strong>PENTING:</strong> Berkas logika (<code>db.js</code>, <code>google-sync.js</code>, atau <code>app.js</code>) gagal dimuat! Pastikan berkas-berkas tersebut sudah diunggah ke hosting Anda.';
               document.body.appendChild(errDiv);
             }
-          }, 'app.js?v=1.4');
-        }, 'google-sync.js?v=1.4');
-      }, 'db.js?v=1.4');
+          }, 'app.js?v=1.8');
+        }, 'google-sync.js?v=1.8');
+      }, 'db.js?v=1.8');
     })();
   </script>
 </body>
