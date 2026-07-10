@@ -371,7 +371,11 @@
   }
 
   function getClientId() {
-    return localStorage.getItem(CLIENT_ID_KEY) || '409883088386-ar3ej7spjkl2t0hglmopa9fotejh1nt6.apps.googleusercontent.com';
+    const stored = localStorage.getItem(CLIENT_ID_KEY);
+    if (stored && stored.trim() && stored.trim().endsWith('.apps.googleusercontent.com')) {
+      return stored.trim();
+    }
+    return '409883088386-ar3ej7spjkl2t0hglmopa9fotejh1nt6.apps.googleusercontent.com';
   }
 
   function saveClientId(id) {
