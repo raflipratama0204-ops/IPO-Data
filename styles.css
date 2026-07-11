@@ -263,6 +263,53 @@ body {
   box-shadow: inset 4px 0 15px -4px var(--primary-glow);
 }
 
+/* ===== Dashboard nav item: menonjol sebagai halaman utama di sidebar desktop ===== */
+.nav-links li:nth-child(4) .nav-item {
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.08) 0%, rgba(157, 78, 221, 0.06) 100%);
+  border: 1px solid rgba(0, 242, 254, 0.18);
+  border-radius: var(--radius-md);
+  margin: 0.15rem 0;
+  transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease, color 0.2s;
+}
+
+.nav-links li:nth-child(4) .nav-item i {
+  width: 34px !important;
+  height: 34px !important;
+  font-size: 1.15rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: var(--radius-sm) !important;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%) !important;
+  color: #080b11 !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 3px 12px rgba(0, 242, 254, 0.35) !important;
+  transition: box-shadow 0.25s ease, transform 0.2s ease !important;
+}
+
+.nav-links li:nth-child(4) .nav-item:hover {
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.13) 0%, rgba(157, 78, 221, 0.10) 100%);
+  border-color: rgba(0, 242, 254, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 242, 254, 0.12);
+}
+
+.nav-links li:nth-child(4) .nav-item:hover i {
+  box-shadow: 0 4px 18px rgba(0, 242, 254, 0.5) !important;
+  transform: scale(1.08) !important;
+}
+
+.nav-links li:nth-child(4) .nav-item.active {
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.15) 0%, rgba(157, 78, 221, 0.12) 100%) !important;
+  border-color: rgba(0, 242, 254, 0.4) !important;
+  border-left: none !important;
+  box-shadow: 0 4px 20px rgba(0, 242, 254, 0.2), inset 0 0 20px rgba(0, 242, 254, 0.04) !important;
+}
+
+.nav-links li:nth-child(4) .nav-item.active i {
+  box-shadow: 0 4px 22px rgba(0, 242, 254, 0.65), 0 0 0 3px rgba(0, 242, 254, 0.18) !important;
+  transform: scale(1.05) !important;
+}
+
 .sidebar-footer {
   margin-top: auto;
   font-size: 0.75rem;
@@ -1275,9 +1322,18 @@ textarea {
   }
   
   .stock-name-container {
-    align-items: flex-end !important;
-    text-align: right !important;
+    align-items: flex-start !important;
+    text-align: left !important;
     width: 100% !important;
+    flex-direction: column !important;
+    gap: 0.2rem !important;
+  }
+  
+  .stock-underwriter {
+    font-size: 0.72rem !important;
+    color: var(--text-muted) !important;
+    display: block !important;
+    margin-top: 0.15rem !important;
   }
   
   /* Transactions Table Labels */
@@ -1375,10 +1431,11 @@ textarea {
   cursor: pointer;
   user-select: none;
   border-bottom: 1px solid var(--glass-border) !important;
+  transition: background 0.2s ease;
 }
 
 .nominee-group-header:hover {
-  background: rgba(255, 255, 255, 0.05) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
 }
 
 .nominee-group-header td {
@@ -1399,8 +1456,13 @@ textarea {
 }
 
 .nominee-group-title .toggle-icon {
-  transition: transform 0.2s ease;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
 }
 
 .nominee-group-header.expanded .toggle-icon {
@@ -1781,9 +1843,19 @@ input:checked + .slider:before {
 
 /* ================= CUSTOM ADDITIONS: MOBILE & THEME FIXES ================= */
 
-/* Hidden row support for collapsed stock orders */
+/* Hidden row support for collapsed stock orders - smooth animation */
+.table-container tr.nominee-order-row {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  transform-origin: top;
+}
+
 .table-container tr.hidden-row {
   display: none !important;
+  opacity: 0;
+}
+
+.table-container tr.nominee-order-row:not(.hidden-row) {
+  opacity: 1;
 }
 
 /* Responsive Chart Container Height */
@@ -1868,8 +1940,71 @@ body.light-theme .nav-item.active {
   background: rgba(15, 23, 42, 0.04) !important;
 }
 
+/* Light theme: pertahankan styling menonjol Dashboard meski ada override di atas */
+body.light-theme .nav-links li:nth-child(4) .nav-item {
+  background: linear-gradient(135deg, rgba(0, 188, 212, 0.10) 0%, rgba(103, 58, 183, 0.07) 100%) !important;
+  border: 1px solid rgba(0, 188, 212, 0.25) !important;
+}
+body.light-theme .nav-links li:nth-child(4) .nav-item:hover {
+  background: linear-gradient(135deg, rgba(0, 188, 212, 0.16) 0%, rgba(103, 58, 183, 0.12) 100%) !important;
+  border-color: rgba(0, 188, 212, 0.4) !important;
+}
+body.light-theme .nav-links li:nth-child(4) .nav-item.active {
+  background: linear-gradient(135deg, rgba(0, 188, 212, 0.18) 0%, rgba(103, 58, 183, 0.13) 100%) !important;
+  border-color: rgba(0, 188, 212, 0.45) !important;
+  border-left: none !important;
+}
+body.light-theme .nav-links li:nth-child(4) .nav-item i {
+  color: #080b11 !important;
+}
+
 /* Responsive Overrides (max-width: 600px) */
 @media (max-width: 600px) {
+  /* === FIX: Prevent iOS auto-zoom on input focus (font-size must be >= 16px) === */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  /* === Dashboard icon: menonjol sebagai tombol utama di tengah bottom nav === */
+  .nav-links li:nth-child(4) {
+    position: relative;
+  }
+
+  .nav-links li:nth-child(4) .nav-item {
+    position: relative;
+    top: -14px;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .nav-links li:nth-child(4) .nav-item i {
+    width: 52px !important;
+    height: 52px !important;
+    font-size: 1.55rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%) !important;
+    color: #080b11 !important;
+    -webkit-text-fill-color: #080b11 !important;
+    box-shadow: 0 4px 18px rgba(0, 242, 254, 0.5), 0 0 0 3px rgba(0, 242, 254, 0.15) !important;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease !important;
+  }
+
+  .nav-links li:nth-child(4) .nav-item:active i {
+    transform: scale(0.93) !important;
+    box-shadow: 0 2px 10px rgba(0, 242, 254, 0.4) !important;
+  }
+
+  .nav-links li:nth-child(4) .nav-item.active i {
+    box-shadow: 0 4px 22px rgba(0, 242, 254, 0.7), 0 0 0 4px rgba(0, 242, 254, 0.2) !important;
+    transform: scale(1.05) !important;
+  }
+
   /* Settings buttons responsive padding */
   .settings-segment-btn {
     padding: 0.5rem 0.75rem;

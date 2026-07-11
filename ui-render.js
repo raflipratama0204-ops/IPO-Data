@@ -641,13 +641,32 @@ function renderOrders() {
       }
 
       const rows = tbody.querySelectorAll(`.order-row-nominee-${nomineeId}`);
-      rows.forEach(r => {
-        if (expandedNow) {
+      if (expandedNow) {
+        // Tampilkan baris dengan efek staggered fade-in
+        rows.forEach((r, idx) => {
           r.classList.remove('hidden-row');
-        } else {
-          r.classList.add('hidden-row');
-        }
-      });
+          r.style.opacity = '0';
+          r.style.transform = 'translateY(-6px)';
+          setTimeout(() => {
+            r.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+            r.style.opacity = '1';
+            r.style.transform = 'translateY(0)';
+          }, idx * 40);
+        });
+      } else {
+        // Sembunyikan baris dengan efek fade-out
+        rows.forEach((r, idx) => {
+          r.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+          r.style.opacity = '0';
+          r.style.transform = 'translateY(-4px)';
+          setTimeout(() => {
+            r.classList.add('hidden-row');
+            r.style.opacity = '';
+            r.style.transform = '';
+            r.style.transition = '';
+          }, 180 + idx * 20);
+        });
+      }
     });
   });
 }

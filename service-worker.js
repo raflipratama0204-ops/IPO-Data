@@ -1,15 +1,15 @@
-const CACHE_NAME = 'ipo-account-hub-v3.1';
+const CACHE_NAME = 'ipo-account-hub-v3.3';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=3.1',
+  './styles.css?v=3.3',
   './manifest.json',
   './Logo IPO Tracker.png',
-  './js/db.js?v=3.1',
-  './js/translations.js?v=3.1',
-  './js/google-sync.js?v=3.1',
-  './js/ui-render.js?v=3.1',
-  './js/app.js?v=3.1'
+  './js/db.js?v=3.3',
+  './js/translations.js?v=3.3',
+  './js/google-sync.js?v=3.3',
+  './js/ui-render.js?v=3.3',
+  './js/app.js?v=3.3'
 ];
 
 // Install Event
