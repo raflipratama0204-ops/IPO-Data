@@ -1607,7 +1607,23 @@ function setupGoogleSync() {
   // Initialize GIS client and check session
   googleSync.init((status) => {
     console.log('Google Sync Initialized status:', status);
-    updateGoogleSyncUI();
+    const userMode = localStorage.getItem('user_mode');
+    if (status && status.connected) {
+      // Sesi berhasil dipulihkan
+      updateGoogleSyncUI();
+    } else if (userMode === 'google') {
+      // Pengguna sebelumnya menggunakan Google tapi sesi habis.
+      // Sembunyikan login screen dan biarkan di mode offline sementara.
+      const loginOverlay = document.getElementById('login-overlay');
+      if (loginOverlay) {
+        loginOverlay.classList.add('hidden');
+        loginOverlay.style.display = 'none';
+      }
+      showDashboard();
+      updateGoogleSyncUI();
+    } else {
+      updateGoogleSyncUI();
+    }
   });
 
   // Save Client ID handler (if UI exists)
@@ -1808,20 +1824,42 @@ async function updateGoogleSyncUI() {
     connectedState.style.display = 'none';
     syncControls.style.display = 'none';
 
-    // Show login overlay if not connected AND not guest
     const userMode = localStorage.getItem('user_mode');
-    if (userMode !== 'guest') {
+
+    if (userMode === 'google') {
+      // Pengguna sebelumnya memilih Google — coba reconnect otomatis, JANGAN tampilkan login screen
+      // Token mungkin kedaluwarsa, coba init ulang di background
+      if (loginOverlay) {
+        // Pastikan login overlay tetap tersembunyi
+        loginOverlay.classList.add('hidden');
+        loginOverlay.style.display = 'none';
+      }
+      showDashboard();
+      // Coba reconnect diam-diam jika GIS library sudah siap
+      if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+        try {
+          googleSync.init((status) => {
+            if (status && status.connected) {
+              updateGoogleSyncUI();
+            }
+          });
+        } catch (e) {
+          console.warn('Silent reconnect failed:', e);
+        }
+      }
+    } else if (userMode === 'guest') {
+      // Mode tamu aktif, sembunyikan overlay
+      if (loginOverlay) {
+        loginOverlay.classList.add('hidden');
+        loginOverlay.style.display = 'none';
+      }
+    } else {
+      // Pengguna baru atau belum pernah memilih — tampilkan login screen
       if (loginOverlay && loginOverlay.classList.contains('hidden')) {
         loginOverlay.style.display = 'flex';
         setTimeout(() => {
           loginOverlay.classList.remove('hidden');
         }, 50);
-      }
-    } else {
-      // If guest mode is active, make sure overlay is hidden
-      if (loginOverlay) {
-        loginOverlay.classList.add('hidden');
-        loginOverlay.style.display = 'none';
       }
     }
   }
