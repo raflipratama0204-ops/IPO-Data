@@ -893,8 +893,9 @@ input, select, textarea {
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-family: var(--font-body);
-  font-size: 0.9rem;
+  font-size: 1rem; /* >= 16px: mencegah iOS auto-zoom saat input difokus */
   transition: var(--transition);
+  touch-action: manipulation; /* mencegah delay tap 300ms di iOS */
 }
 
 input:focus, select:focus, textarea:focus {

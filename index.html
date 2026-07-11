@@ -7,7 +7,7 @@
   <title>IPO Account Hub - Database Portofolio Akun</title>
   <!-- Google Fonts & FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css?v=3.3">
+  <link rel="stylesheet" href="styles.css?v=3.4">
   
   <!-- Mobile Home Screen (Add to Home Screen) Icons & Settings -->
   <link rel="icon" type="image/png" href="Logo IPO Tracker.png">
@@ -1096,11 +1096,11 @@
         document.body.appendChild(script);
       }
       // Memuat db.js -> translations.js -> google-sync.js -> ui-render.js -> app.js
-      loadScript('js/db.js?v=3.3', function(dbSuccess) {
-        loadScript('js/translations.js?v=3.3', function(transSuccess) {
-          loadScript('js/google-sync.js?v=3.3', function(syncSuccess) {
-            loadScript('js/ui-render.js?v=3.3', function(uiSuccess) {
-              loadScript('js/app.js?v=3.3', function(appSuccess) {
+      loadScript('js/db.js?v=3.4', function(dbSuccess) {
+        loadScript('js/translations.js?v=3.4', function(transSuccess) {
+          loadScript('js/google-sync.js?v=3.4', function(syncSuccess) {
+            loadScript('js/ui-render.js?v=3.4', function(uiSuccess) {
+              loadScript('js/app.js?v=3.4', function(appSuccess) {
                 // Cek apakah database, terjemahan, renderer, googleSync, dan fungsi utama berhasil dimuat
                 if (typeof db === 'undefined' || typeof UI_TRANSLATIONS === 'undefined' || typeof renderDashboard === 'undefined' || typeof googleSync === 'undefined' || typeof refreshAll === 'undefined') {
                   const errDiv = document.createElement('div');
@@ -1119,11 +1119,11 @@
                   errDiv.innerHTML = '<strong>PENTING:</strong> Berkas logika (<code>db.js</code>, <code>translations.js</code>, <code>google-sync.js</code>, <code>ui-render.js</code>, atau <code>app.js</code>) gagal dimuat! Pastikan berkas-berkas tersebut sudah diunggah ke hosting Anda.';
                   document.body.appendChild(errDiv);
                 }
-              }, 'app.js?v=3.3');
-            }, 'ui-render.js?v=3.3');
-          }, 'google-sync.js?v=3.3');
-        }, 'translations.js?v=3.3');
-      }, 'db.js?v=3.3');
+              }, 'app.js?v=3.4');
+            }, 'ui-render.js?v=3.4');
+          }, 'google-sync.js?v=3.4');
+        }, 'translations.js?v=3.4');
+      }, 'db.js?v=3.4');
     })();
   </script>
 
