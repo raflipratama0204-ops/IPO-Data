@@ -69,6 +69,13 @@ body.light-theme .ambient-glow-2 {
   opacity: 0.15 !important;
 }
 
+body.light-theme .logo-text {
+  background: linear-gradient(to right, var(--text-primary), var(--text-secondary)) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
 body.light-theme input, 
 body.light-theme select, 
 body.light-theme textarea {
@@ -348,14 +355,15 @@ body {
   }
 
   .sidebar.collapsed .logo-container {
-    justify-content: center;
-    gap: 0;
+    justify-content: flex-start;
+    padding-left: 11px !important;
+    gap: 0 !important;
   }
 
   .sidebar.collapsed .nav-item {
-    justify-content: center;
-    padding: 0.85rem;
-    gap: 0;
+    justify-content: flex-start;
+    padding: 0.85rem 0.93rem !important;
+    gap: 0 !important;
   }
 
   .sidebar.collapsed + .main-content {
@@ -599,6 +607,22 @@ td {
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   color: var(--text-primary);
   vertical-align: middle;
+}
+
+/* Stock list custom cell flex layout */
+.stock-name-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+.stock-underwriter {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
 }
 
 tr:hover td {
@@ -1250,6 +1274,12 @@ textarea {
     display: none !important;
   }
   
+  .stock-name-container {
+    align-items: flex-end !important;
+    text-align: right !important;
+    width: 100% !important;
+  }
+  
   /* Transactions Table Labels */
   #list-transactions td:nth-of-type(1):before { content: "Tanggal" !important; }
   #list-transactions td:nth-of-type(2):before { content: "Nominee" !important; }
@@ -1747,6 +1777,212 @@ input:checked + .slider:before {
 .toast.toast-fade-out {
   opacity: 0;
   transform: translateY(-20px);
+}
+
+/* ================= CUSTOM ADDITIONS: MOBILE & THEME FIXES ================= */
+
+/* Hidden row support for collapsed stock orders */
+.table-container tr.hidden-row {
+  display: none !important;
+}
+
+/* Responsive Chart Container Height */
+.chart-container {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height: 300px;
+  overflow: hidden;
+}
+@media (max-width: 600px) {
+  .chart-container {
+    height: 180px !important;
+  }
+}
+
+/* Segmented settings navigation layout */
+.settings-segments {
+  display: flex;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 0.35rem;
+  margin-bottom: 1.5rem;
+  gap: 0.25rem;
+  overflow-x: auto;
+}
+
+.settings-segment-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+
+.settings-segment-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.settings-segment-btn.active {
+  color: #080b11;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  box-shadow: 0 4px 12px rgba(0, 242, 254, 0.2);
+}
+
+/* Settings segment content panels */
+.settings-segment-content {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.settings-segment-content.active {
+  display: block;
+}
+
+/* Light Theme overrides for active/hover nav links and elements */
+body.light-theme .settings-segments {
+  background: rgba(15, 23, 42, 0.04);
+}
+body.light-theme .settings-segment-btn:hover {
+  background: rgba(15, 23, 42, 0.02);
+}
+body.light-theme .settings-segment-btn.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+}
+body.light-theme .nav-item:hover,
+body.light-theme .nav-item.active {
+  background: rgba(15, 23, 42, 0.04) !important;
+}
+
+/* Responsive Overrides (max-width: 600px) */
+@media (max-width: 600px) {
+  /* Settings buttons responsive padding */
+  .settings-segment-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.78rem;
+    gap: 0.35rem;
+  }
+
+  /* Light Theme overrides for bottom nav in mobile */
+  body.light-theme .sidebar {
+    background: rgba(248, 250, 252, 0.96) !important;
+    border-top-color: rgba(15, 23, 42, 0.08) !important;
+  }
+  body.light-theme .nav-item {
+    color: #475569 !important;
+  }
+  body.light-theme .nav-item i {
+    color: #475569 !important;
+  }
+  body.light-theme .nav-item.active {
+    background: rgba(15, 23, 42, 0.04) !important;
+    color: var(--primary) !important;
+  }
+  body.light-theme .nav-item.active i {
+    color: var(--primary) !important;
+  }
+
+  /* Dashboard: Nominees outstanding balance table (Tagihan Per Akun) */
+  #table-dashboard-nominees,
+  #table-dashboard-nominees tbody,
+  #table-dashboard-nominees tr,
+  #table-dashboard-nominees td {
+    display: revert !important;
+  }
+  #table-dashboard-nominees td {
+    padding: 0.65rem 0.25rem !important;
+    border-bottom: 1px solid var(--glass-border) !important;
+    font-size: 0.8rem !important;
+    padding-left: 0 !important;
+    text-align: left !important;
+  }
+  #table-dashboard-nominees td.text-right {
+    text-align: right !important;
+  }
+
+  /* Dashboard: Recent Financial Logs (Aktivitas Log Keuangan) */
+  #list-dashboard-transfers tr {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0.5rem 0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background: none !important;
+    border-radius: 0 !important;
+    margin-bottom: 0 !important;
+    box-shadow: none !important;
+  }
+  body.light-theme #list-dashboard-transfers tr {
+    border-bottom-color: rgba(15, 23, 42, 0.08) !important;
+  }
+  
+  #list-dashboard-transfers td {
+    border: none !important;
+    padding: 0 !important;
+    padding-left: 0 !important;
+    min-height: 0 !important;
+  }
+  #list-dashboard-transfers td:before {
+    display: none !important;
+  }
+
+  /* Row 1 items: Nominee (td 2) and Amount (td 4) */
+  #list-dashboard-transfers td:nth-child(2) {
+    order: 1 !important;
+    flex-basis: 50% !important;
+    text-align: left !important;
+    font-size: 0.82rem !important;
+  }
+  #list-dashboard-transfers td:nth-child(4) {
+    order: 2 !important;
+    flex-basis: 50% !important;
+    text-align: right !important;
+    font-size: 0.82rem !important;
+    font-weight: 700 !important;
+  }
+  
+  /* Row 2 items: Date (td 1), Type (td 3), Notes (td 5) */
+  #list-dashboard-transfers td:nth-child(1) {
+    order: 3 !important;
+    flex-basis: auto !important;
+    font-size: 0.72rem !important;
+    color: var(--text-muted) !important;
+    margin-top: 0.25rem !important;
+    margin-right: 0.5rem !important;
+  }
+  #list-dashboard-transfers td:nth-child(3) {
+    order: 4 !important;
+    flex-basis: auto !important;
+    font-size: 0.72rem !important;
+    margin-top: 0.25rem !important;
+    margin-right: 0.5rem !important;
+  }
+  #list-dashboard-transfers td:nth-child(5) {
+    order: 5 !important;
+    flex-grow: 1 !important;
+    font-size: 0.72rem !important;
+    color: var(--text-secondary) !important;
+    margin-top: 0.25rem !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
 }
 
 

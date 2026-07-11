@@ -7,7 +7,7 @@
   <title>IPO Account Hub - Database Portofolio Akun</title>
   <!-- Google Fonts & FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css?v=2.5">
+  <link rel="stylesheet" href="styles.css?v=3.1">
   
   <!-- Mobile Home Screen (Add to Home Screen) Icons & Settings -->
   <link rel="icon" type="image/png" href="Logo IPO Tracker.png">
@@ -59,18 +59,18 @@
         <div class="login-logo-icon">IP</div>
         <div class="login-logo-text">IPO HUB</div>
       </div>
-      <p class="login-tagline">
+      <p class="login-tagline" data-i18n="loginTagline">
         Kelola database portofolio akun nominee dan transaksi saham IPO Anda secara aman di Google Drive Anda.
       </p>
       <div class="login-buttons">
-        <button class="btn btn-login-google" id="btn-login-google">
+        <button class="btn btn-login-google" id="btn-login-google" data-i18n="loginBtnGoogle">
           <i class="fa-brands fa-google"></i> Hubungkan dengan Google
         </button>
-        <button class="btn btn-login-guest" id="btn-login-guest">
+        <button class="btn btn-login-guest" id="btn-login-guest" data-i18n="loginBtnGuest">
           <i class="fa-solid fa-user-secret"></i> Masuk sebagai Tamu (Offline)
         </button>
       </div>
-      <p class="login-footer-text">
+      <p class="login-footer-text" data-i18n="loginFooterText">
         * Mode Tamu menyimpan data secara lokal di browser Anda. Mode Google mencadangkan data secara aman di Google Drive pribadi Anda.
       </p>
     </div>
@@ -164,7 +164,7 @@
           <p id="page-subtitle">Selamat datang kembali! Berikut adalah statistik agregat akun IPO Anda.</p>
         </div>
         <div class="header-actions">
-          <button class="btn btn-secondary" id="btn-seed-data" title="Muat Data Demo untuk Demo">
+          <button class="btn btn-secondary" id="btn-seed-data" title="Muat Data Demo untuk Demo" data-i18n="btnDemoData">
             <i class="fa-solid fa-database"></i> Data Demo
           </button>
         </div>
@@ -176,7 +176,7 @@
         <div class="kpi-grid">
           <div class="glass-card kpi-card" style="--accent: var(--info); --accent-glow: rgba(59, 130, 246, 0.15);">
             <div class="kpi-header">
-              <span>Total Modal Ditransfer</span>
+              <span data-i18n="kpiTotalTransferred">Total Modal Ditransfer</span>
               <div class="kpi-icon"><i class="fa-solid fa-paper-plane"></i></div>
             </div>
             <div class="kpi-value" id="kpi-total-transferred">Rp 0</div>
@@ -185,7 +185,7 @@
 
           <div class="glass-card kpi-card" style="--accent: var(--success); --accent-glow: var(--success-glow);">
             <div class="kpi-header">
-              <span>Total Keuntungan Bersih</span>
+              <span data-i18n="kpiTotalNetProfit">Total Keuntungan Bersih</span>
               <div class="kpi-icon"><i class="fa-solid fa-sack-dollar"></i></div>
             </div>
             <div class="kpi-value text-profit" id="kpi-total-profit">Rp 0</div>
@@ -194,7 +194,7 @@
 
           <div class="glass-card kpi-card" style="--accent: var(--warning); --accent-glow: var(--warning-glow);">
             <div class="kpi-header">
-              <span>Sisa Uang Di Nominee</span>
+              <span data-i18n="kpiOutstandingNominee">Sisa Uang Di Nominee</span>
               <div class="kpi-icon"><i class="fa-solid fa-hourglass-half"></i></div>
             </div>
             <div class="kpi-value text-outstanding" id="kpi-total-outstanding">Rp 0</div>
@@ -203,7 +203,7 @@
 
           <div class="glass-card kpi-card" style="--accent: var(--danger); --accent-glow: var(--danger-glow);">
             <div class="kpi-header">
-              <span>Sisa Hutang Saya</span>
+              <span data-i18n="kpiRemainingDebt">Sisa Hutang Saya</span>
               <div class="kpi-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
             </div>
             <div class="kpi-value text-loss" id="kpi-total-debt-remaining">Rp 0</div>
@@ -212,7 +212,7 @@
 
           <div class="glass-card kpi-card" style="--accent: var(--secondary); --accent-glow: var(--secondary-glow);">
             <div class="kpi-header">
-              <span>Rincian Hub</span>
+              <span data-i18n="kpiHubDetails">Rincian Hub</span>
               <div class="kpi-icon"><i class="fa-solid fa-network-wired"></i></div>
             </div>
             <div class="kpi-value" id="kpi-counts">0 Akun</div>
@@ -225,9 +225,9 @@
           <!-- Profit chart per stock -->
           <div class="glass-card">
             <div class="section-header">
-              <h2 class="section-title"><i class="fa-solid fa-chart-bar text-profit"></i> Keuntungan Per Saham IPO</h2>
+              <h2 class="section-title" data-i18n="dashboardProfitChartTitle"><i class="fa-solid fa-chart-bar text-profit"></i> Keuntungan Per Saham IPO</h2>
             </div>
-            <div style="height: 300px; position: relative;">
+            <div class="chart-container" style="position: relative;">
               <canvas id="chart-stock-profits"></canvas>
             </div>
           </div>
@@ -235,14 +235,14 @@
           <!-- Nominee outstanding list -->
           <div class="glass-card">
             <div class="section-header">
-              <h2 class="section-title"><i class="fa-solid fa-wallet text-outstanding"></i> Tagihan per Akun</h2>
+              <h2 class="section-title" data-i18n="dashboardBillingsTitle"><i class="fa-solid fa-wallet text-outstanding"></i> Tagihan per Akun</h2>
             </div>
             <div class="table-container">
               <table id="table-dashboard-nominees">
                 <thead>
                   <tr>
-                    <th>Nama Akun</th>
-                    <th class="text-right">Sisa Tagihan</th>
+                    <th data-i18n="tableHeaderAccountName">Nama Akun</th>
+                    <th class="text-right" data-i18n="tableHeaderRemainingBilling">Sisa Tagihan</th>
                   </tr>
                 </thead>
                 <tbody id="list-dashboard-nominees">
@@ -256,17 +256,17 @@
         <!-- Recent transactions -->
         <div class="glass-card">
           <div class="section-header">
-            <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Aktivitas Log Keuangan Terkini</h2>
+            <h2 class="section-title" data-i18n="dashboardRecentActivitiesTitle"><i class="fa-solid fa-clock-rotate-left"></i> Aktivitas Log Keuangan Terkini</h2>
           </div>
           <div class="table-container">
-            <table>
+            <table id="table-dashboard-transfers">
               <thead>
                 <tr>
-                  <th>Tanggal</th>
-                  <th>Nama Akun</th>
-                  <th>Tipe</th>
-                  <th class="text-right">Jumlah</th>
-                  <th>Keterangan</th>
+                  <th data-i18n="tableHeaderDate">Tanggal</th>
+                  <th data-i18n="tableHeaderAccountName">Nama Akun</th>
+                  <th data-i18n="tableHeaderType">Tipe</th>
+                  <th class="text-right" data-i18n="tableHeaderAmount">Jumlah</th>
+                  <th data-i18n="tableHeaderNotes">Keterangan</th>
                 </tr>
               </thead>
               <tbody id="list-dashboard-transfers">
@@ -283,10 +283,10 @@
           <div class="filter-bar">
             <div class="search-input-wrapper">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="search-nominee" placeholder="Cari nama akun atau bank...">
+              <input type="text" id="search-nominee" placeholder="Cari nama akun atau bank..." data-i18n="placeholderSearchNominee">
             </div>
           </div>
-          <button class="btn btn-primary" id="btn-add-nominee">
+          <button class="btn btn-primary" id="btn-add-nominee" data-i18n="btnAddNominee">
             <i class="fa-solid fa-user-plus"></i> Tambah Akun Baru
           </button>
         </div>
@@ -303,17 +303,20 @@
           <div class="filter-bar">
             <div class="search-input-wrapper">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="search-stock" placeholder="Cari kode atau nama saham...">
+              <input type="text" id="search-stock" placeholder="Cari kode atau nama saham..." data-i18n="placeholderSearchStock">
             </div>
             <select class="filter-select" id="filter-stock-status">
-              <option value="all">Semua Status</option>
-              <option value="active">Bookbuilding/Offering</option>
-              <option value="allotted">Penjatahan Selesai</option>
-              <option value="listed">Tercatat (Trading)</option>
-              <option value="closed">Selesai</option>
+              <option value="all" data-i18n="optAllStatus">Semua Status</option>
+              <option value="active" data-i18n="optStatusBookbuilding">Bookbuilding/Offering</option>
+              <option value="allotted" data-i18n="optStatusAllotted">Penjatahan Selesai</option>
+              <option value="listed" data-i18n="optStatusListed">Tercatat (Trading)</option>
+              <option value="closed" data-i18n="optStatusClosed">Selesai</option>
+            </select>
+            <select class="filter-select" id="filter-stock-underwriter">
+              <option value="all" data-i18n="optAllUnderwriters">Semua Underwriter</option>
             </select>
           </div>
-          <button class="btn btn-primary" id="btn-add-stock">
+          <button class="btn btn-primary" id="btn-add-stock" data-i18n="btnAddStock">
             <i class="fa-solid fa-circle-plus"></i> Tambah Saham IPO
           </button>
         </div>
@@ -323,14 +326,14 @@
             <table>
               <thead>
                 <tr>
-                  <th>Kode</th>
-                  <th>Nama Perusahaan</th>
-                  <th class="text-right">Harga IPO (lbr)</th>
-                  <th>Tgl Listing</th>
-                  <th>Status</th>
-                  <th class="text-right">Total Pesanan (Lot)</th>
-                  <th class="text-right">Total Keuntungan</th>
-                  <th>Aksi</th>
+                  <th data-i18n="thCode">Kode</th>
+                  <th data-i18n="thCompanyName">Nama Perusahaan</th>
+                  <th class="text-right" data-i18n="thIpoPrice">Harga IPO (lbr)</th>
+                  <th data-i18n="thListingDate">Tgl Listing</th>
+                  <th data-i18n="thStatus">Status</th>
+                  <th class="text-right" data-i18n="thTotalOrderedLots">Total Pesanan (Lot)</th>
+                  <th class="text-right" data-i18n="thTotalProfit">Total Keuntungan</th>
+                  <th data-i18n="thActions">Aksi</th>
                 </tr>
               </thead>
               <tbody id="list-stocks">
@@ -347,25 +350,25 @@
           <div class="filter-bar">
             <div class="search-input-wrapper">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="search-order" placeholder="Cari akun atau saham...">
+              <input type="text" id="search-order" placeholder="Cari akun atau saham..." data-i18n="placeholderSearchOrder">
             </div>
             <select class="filter-select" id="filter-order-status">
-              <option value="all">Semua Status</option>
-              <option value="ordered">Dipesan (Locked)</option>
-              <option value="allotted">Dapat Penjatahan (Unsold)</option>
-              <option value="not_allotted">Tidak Dapat Penjatahan</option>
-              <option value="sold">Sudah Dijual (Closed)</option>
+              <option value="all" data-i18n="optAllStatus">Semua Status</option>
+              <option value="ordered" data-i18n="optOrderStatusOrdered">Dipesan (Locked)</option>
+              <option value="allotted" data-i18n="optOrderStatusAllotted">Dapat Penjatahan (Unsold)</option>
+              <option value="not_allotted" data-i18n="optOrderStatusNotAllotted">Tidak Dapat Penjatahan</option>
+              <option value="sold" data-i18n="optOrderStatusSold">Sudah Dijual (Closed)</option>
             </select>
             <div class="toggle-buttons-group">
-              <button class="btn btn-secondary btn-sm" id="btn-expand-all-orders" title="Buka Semua Grup">
+              <button class="btn btn-secondary btn-sm" id="btn-expand-all-orders" title="Buka Semua Grup" data-i18n="btnExpandAll">
                 <i class="fa-solid fa-expand"></i> Buka Semua
               </button>
-              <button class="btn btn-secondary btn-sm" id="btn-collapse-all-orders" title="Tutup Semua Grup">
+              <button class="btn btn-secondary btn-sm" id="btn-collapse-all-orders" title="Tutup Semua Grup" data-i18n="btnCollapseAll">
                 <i class="fa-solid fa-compress"></i> Tutup Semua
               </button>
             </div>
           </div>
-          <button class="btn btn-primary" id="btn-add-order">
+          <button class="btn btn-primary" id="btn-add-order" data-i18n="btnCreateOrder">
             <i class="fa-solid fa-file-invoice-dollar"></i> Buat Pesanan Baru
           </button>
         </div>
@@ -375,16 +378,16 @@
             <table>
               <thead>
                 <tr>
-                  <th>Info</th>
-                  <th>Saham</th>
-                  <th class="text-right">Pesanan (Lot)</th>
-                  <th class="text-right">Dana Dipesan</th>
-                  <th class="text-right">Penjatahan (Lot)</th>
-                  <th class="text-right">Refund (Sisa Lot)</th>
-                  <th class="text-right">Harga Jual (lbr)</th>
-                  <th class="text-right">Keuntungan</th>
-                  <th>Status</th>
-                  <th>Aksi</th>
+                  <th data-i18n="thInfo">Info</th>
+                  <th data-i18n="thStock">Saham</th>
+                  <th class="text-right" data-i18n="thOrderedLots">Pesanan (Lot)</th>
+                  <th class="text-right" data-i18n="thOrderedFunds">Dana Dipesan</th>
+                  <th class="text-right" data-i18n="thAllottedLots">Penjatahan (Lot)</th>
+                  <th class="text-right" data-i18n="thRefundLots">Refund (Sisa Lot)</th>
+                  <th class="text-right" data-i18n="thSellPrice">Harga Jual (lbr)</th>
+                  <th class="text-right" data-i18n="thProfit">Keuntungan</th>
+                  <th data-i18n="thStatus">Status</th>
+                  <th data-i18n="thActions">Aksi</th>
                 </tr>
               </thead>
               <tbody id="list-orders">
@@ -401,15 +404,15 @@
           <div class="filter-bar">
             <div class="search-input-wrapper">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="search-transaction" placeholder="Cari akun atau catatan...">
+              <input type="text" id="search-transaction" placeholder="Cari akun atau catatan..." data-i18n="placeholderSearchTransaction">
             </div>
             <select class="filter-select" id="filter-transaction-type">
-              <option value="all">Semua Jenis Transaksi</option>
-              <option value="transfer">Transfer Modal (Ke Akun)</option>
-              <option value="return">Pengembalian Uang (Ke Saya)</option>
+              <option value="all" data-i18n="optAllTransactionTypes">Semua Jenis Transaksi</option>
+              <option value="transfer" data-i18n="optTxTypeTransfer">Transfer Modal (Ke Akun)</option>
+              <option value="return" data-i18n="optTxTypeReturn">Pengembalian Uang (Ke Saya)</option>
             </select>
           </div>
-          <button class="btn btn-primary" id="btn-add-transaction">
+          <button class="btn btn-primary" id="btn-add-transaction" data-i18n="btnAddTransaction">
             <i class="fa-solid fa-plus-minus"></i> Tambah Transaksi Keuangan
           </button>
         </div>
@@ -419,12 +422,12 @@
             <table>
               <thead>
                 <tr>
-                  <th>Tanggal</th>
-                  <th>Akun Nominee</th>
-                  <th>Jenis</th>
-                  <th class="text-right">Jumlah Uang</th>
-                  <th>Keterangan</th>
-                  <th>Aksi</th>
+                  <th data-i18n="thDate">Tanggal</th>
+                  <th data-i18n="thNomineeAccount">Akun Nominee</th>
+                  <th data-i18n="thType">Jenis</th>
+                  <th class="text-right" data-i18n="thAmountOfMoney">Jumlah Uang</th>
+                  <th data-i18n="thNotes">Keterangan</th>
+                  <th data-i18n="thActions">Aksi</th>
                 </tr>
               </thead>
               <tbody id="list-transactions">
@@ -441,10 +444,10 @@
           <div class="filter-bar">
             <div class="search-input-wrapper">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="search-debt" placeholder="Cari nama kreditur atau catatan...">
+              <input type="text" id="search-debt" placeholder="Cari nama kreditur atau catatan..." data-i18n="placeholderSearchDebt">
             </div>
           </div>
-          <button class="btn btn-primary" id="btn-add-debt">
+          <button class="btn btn-primary" id="btn-add-debt" data-i18n="btnAddDebt">
             <i class="fa-solid fa-circle-plus"></i> Tambah Hutang Baru
           </button>
         </div>
@@ -454,14 +457,14 @@
             <table>
               <thead>
                 <tr>
-                  <th>Tanggal Pinjam</th>
-                  <th>Pemberi Pinjaman (Kreditur)</th>
-                  <th class="text-right">Jumlah Pinjaman</th>
-                  <th class="text-right">Telah Dibayar</th>
-                  <th class="text-right">Sisa Hutang</th>
-                  <th>Status</th>
-                  <th>Keterangan</th>
-                  <th>Aksi</th>
+                  <th data-i18n="thBorrowDate">Tanggal Pinjam</th>
+                  <th data-i18n="thCreditor">Pemberi Pinjaman (Kreditur)</th>
+                  <th class="text-right" data-i18n="thDebtAmount">Jumlah Pinjaman</th>
+                  <th class="text-right" data-i18n="thDebtPaid">Telah Dibayar</th>
+                  <th class="text-right" data-i18n="thRemainingDebt">Sisa Hutang</th>
+                  <th data-i18n="thStatus">Status</th>
+                  <th data-i18n="thNotes">Keterangan</th>
+                  <th data-i18n="thActions">Aksi</th>
                 </tr>
               </thead>
               <tbody id="list-debts">
@@ -479,8 +482,24 @@
             <h2 class="section-title" style="margin: 0;" id="settings-title"><i class="fa-solid fa-gear text-primary"></i> Pengaturan Aplikasi</h2>
           </div>
 
+          <!-- Segmented navigation buttons -->
+          <div class="settings-segments">
+            <button class="settings-segment-btn active" data-segment="preference" id="btn-segment-pref" data-i18n="segmentPreference">
+              <i class="fa-solid fa-palette"></i> Preferensi
+            </button>
+            <button class="settings-segment-btn" data-segment="cloud" id="btn-segment-cloud" data-i18n="segmentCloud">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Cloud
+            </button>
+            <button class="settings-segment-btn" data-segment="security" id="btn-segment-security" data-i18n="segmentSecurity">
+              <i class="fa-solid fa-shield-halved"></i> Keamanan
+            </button>
+            <button class="settings-segment-btn" data-segment="about" id="btn-segment-about" data-i18n="segmentAbout">
+              <i class="fa-solid fa-circle-info"></i> Tentang
+            </button>
+          </div>
+
           <!-- Group 1: Tampilan & Preferensi -->
-          <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+          <div id="settings-segment-preference" class="settings-segment-content active" style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
             <h3 style="font-size: 1rem; font-family: var(--font-title); margin-bottom: 1.25rem; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; text-transform: uppercase; font-weight: 700;" id="settings-pref-title">
               <i class="fa-solid fa-palette"></i> Preferensi Tampilan & Bahasa
             </h3>
@@ -490,8 +509,8 @@
               <div class="form-group" style="margin-bottom: 0;">
                 <label for="settings-theme" style="font-size: 0.85rem;" id="settings-theme-label">Tema Tampilan</label>
                 <select id="settings-theme" class="filter-select" style="margin-top: 0.5rem; width: 100%; display: block; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border); color: var(--text-primary); padding: 0.5rem; border-radius: 6px;">
-                  <option value="dark">Tema Gelap (Premium Dark)</option>
-                  <option value="light">Tema Terang (Clean Light)</option>
+                  <option value="dark" data-i18n="themeDark">Tema Gelap (Premium Dark)</option>
+                  <option value="light" data-i18n="themeLight">Tema Terang (Clean Light)</option>
                 </select>
               </div>
               
@@ -507,7 +526,7 @@
           </div>
 
           <!-- Group 2: Akun & Sinkronisasi Cloud (Urusan Perloginan) -->
-          <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+          <div id="settings-segment-cloud" class="settings-segment-content" style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
             <h3 style="font-size: 1rem; font-family: var(--font-title); margin-bottom: 1.25rem; color: var(--success); display: flex; align-items: center; gap: 0.5rem; text-transform: uppercase; font-weight: 700;" id="settings-sync-title">
               <i class="fa-solid fa-cloud-arrow-up"></i> Akun & Sinkronisasi Cloud
             </h3>
@@ -578,7 +597,7 @@
           </div>
 
           <!-- Group 3: Pembersihan & Keamanan Data -->
-          <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+          <div id="settings-segment-security" class="settings-segment-content" style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
             <h3 style="font-size: 1rem; font-family: var(--font-title); margin-bottom: 1.25rem; color: var(--danger); display: flex; align-items: center; gap: 0.5rem; text-transform: uppercase; font-weight: 700;" id="settings-data-title">
               <i class="fa-solid fa-shield-halved"></i> Manajemen Data & Keamanan
             </h3>
@@ -595,7 +614,7 @@
           </div>
 
           <!-- Group 4: Tentang Aplikasi -->
-          <div style="background: rgba(255, 255, 255, 0.005); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--radius-md);">
+          <div id="settings-segment-about" class="settings-segment-content" style="background: rgba(255, 255, 255, 0.005); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--radius-md);">
             <h3 style="font-size: 1rem; font-family: var(--font-title); margin-bottom: 1.25rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.5rem; text-transform: uppercase; font-weight: 700;" id="settings-about-title">
               <i class="fa-solid fa-circle-info"></i> Tentang Aplikasi
             </h3>
@@ -1076,32 +1095,62 @@
         };
         document.body.appendChild(script);
       }
-      // Memuat db.js terlebih dahulu, setelah selesai memuat google-sync.js, kemudian memuat app.js
-      loadScript('js/db.js?v=2.5', function(dbSuccess) {
-        loadScript('js/google-sync.js?v=2.5', function(syncSuccess) {
-          loadScript('js/app.js?v=2.5', function(appSuccess) {
-            // Cek apakah database, googleSync, dan fungsi utama berhasil dimuat
-            if (typeof db === 'undefined' || typeof googleSync === 'undefined' || typeof refreshAll === 'undefined') {
-              const errDiv = document.createElement('div');
-              errDiv.style.position = 'fixed';
-              errDiv.style.top = '0';
-              errDiv.style.left = '0';
-              errDiv.style.width = '100%';
-              errDiv.style.background = 'rgba(220, 38, 38, 0.95)';
-              errDiv.style.color = '#ffffff';
-              errDiv.style.padding = '12px';
-              errDiv.style.zIndex = '999999';
-              errDiv.style.fontSize = '14px';
-              errDiv.style.fontFamily = 'sans-serif';
-              errDiv.style.textAlign = 'center';
-              errDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
-              errDiv.innerHTML = '<strong>PENTING:</strong> Berkas logika (<code>db.js</code>, <code>google-sync.js</code>, atau <code>app.js</code>) gagal dimuat! Pastikan berkas-berkas tersebut sudah diunggah ke hosting Anda.';
-              document.body.appendChild(errDiv);
-            }
-          }, 'app.js?v=2.5');
-        }, 'google-sync.js?v=2.5');
-      }, 'db.js?v=2.5');
+      // Memuat db.js -> translations.js -> google-sync.js -> ui-render.js -> app.js
+      loadScript('js/db.js?v=3.1', function(dbSuccess) {
+        loadScript('js/translations.js?v=3.1', function(transSuccess) {
+          loadScript('js/google-sync.js?v=3.1', function(syncSuccess) {
+            loadScript('js/ui-render.js?v=3.1', function(uiSuccess) {
+              loadScript('js/app.js?v=3.1', function(appSuccess) {
+                // Cek apakah database, terjemahan, renderer, googleSync, dan fungsi utama berhasil dimuat
+                if (typeof db === 'undefined' || typeof UI_TRANSLATIONS === 'undefined' || typeof renderDashboard === 'undefined' || typeof googleSync === 'undefined' || typeof refreshAll === 'undefined') {
+                  const errDiv = document.createElement('div');
+                  errDiv.style.position = 'fixed';
+                  errDiv.style.top = '0';
+                  errDiv.style.left = '0';
+                  errDiv.style.width = '100%';
+                  errDiv.style.background = 'rgba(220, 38, 38, 0.95)';
+                  errDiv.style.color = '#ffffff';
+                  errDiv.style.padding = '12px';
+                  errDiv.style.zIndex = '999999';
+                  errDiv.style.fontSize = '14px';
+                  errDiv.style.fontFamily = 'sans-serif';
+                  errDiv.style.textAlign = 'center';
+                  errDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
+                  errDiv.innerHTML = '<strong>PENTING:</strong> Berkas logika (<code>db.js</code>, <code>translations.js</code>, <code>google-sync.js</code>, <code>ui-render.js</code>, atau <code>app.js</code>) gagal dimuat! Pastikan berkas-berkas tersebut sudah diunggah ke hosting Anda.';
+                  document.body.appendChild(errDiv);
+                }
+              }, 'app.js?v=3.1');
+            }, 'ui-render.js?v=3.1');
+          }, 'google-sync.js?v=3.1');
+        }, 'translations.js?v=3.1');
+      }, 'db.js?v=3.1');
     })();
+  </script>
+
+  <!-- Service Worker Registration to handle PWA updates dynamically -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(reg => {
+            console.log('Service Worker registered:', reg.scope);
+            // Force update check when entering the app
+            reg.update();
+          })
+          .catch(err => {
+            console.error('Service Worker registration failed:', err);
+          });
+      });
+
+      // Auto reload the page once a new service worker takes control
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
+    }
   </script>
 </body>
 </html>
