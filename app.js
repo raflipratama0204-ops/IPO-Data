@@ -428,6 +428,11 @@ function setupModals() {
   document.getElementById('btn-add-debt').addEventListener('click', () => {
     openDebtModal();
   });
+
+  const btnShareNominee = document.getElementById('btn-share-nominee');
+  if (btnShareNominee) {
+    btnShareNominee.addEventListener('click', shareNomineeReport);
+  }
 }
 
 function openModal(id) {
@@ -837,6 +842,11 @@ function openDebtModal(debt = null) {
 function openNomineeDetailModal(nomineeId) {
   const stats = db.getNomineeStats(nomineeId);
   if (!stats) return;
+
+  const btnShare = document.getElementById('btn-share-nominee');
+  if (btnShare) {
+    btnShare.setAttribute('data-nominee-id', nomineeId);
+  }
   
   document.getElementById('detail-nominee-name').textContent = `Detail Portofolio: ${stats.name}`;
   document.getElementById('detail-total-transferred').textContent = formatRupiah(stats.totalTransferred);
@@ -936,6 +946,86 @@ function openNomineeDetailModal(nomineeId) {
   }
 
   openModal('modal-nominee-detail');
+}
+
+function shareNomineeReport() {
+  const nomineeId = this.getAttribute('data-nominee-id');
+  if (!nomineeId) return;
+
+  const stats = db.getNomineeStats(nomineeId);
+  if (!stats) return;
+
+  const orders = db.getOrders().filter(o => o.nomineeId === nomineeId);
+  const stocks = db.getStocks();
+
+  const lang = localStorage.getItem('app_lang') || 'id';
+  const today = new Date().toLocaleDateString(lang === 'id' ? 'id-ID' : 'en-US', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  let text = `📊 *LAPORAN DETAIL PORTOFOLIO: ${stats.name.toUpperCase()}*\n`;
+  text += `📅 _Tanggal: ${today}_\n\n`;
+
+  text += `💰 *Ringkasan Keuangan:*\n`;
+  text += `• Total Dana Ditransfer (A): *${formatRupiah(stats.totalTransferred)}*\n`;
+  text += `• Total Dana Dikembalikan (B): *${formatRupiah(stats.totalReturned)}*\n`;
+  text += `• Total Keuntungan Saham (C): *${formatRupiah(stats.totalProfit)}*\n`;
+  text += `• Bagi Hasil Nominee (D) (${stats.profitSharePct || 0}%): *${formatRupiah(stats.profitShareAmount)}*\n`;
+  text += `• Keuntungan Bersih Saya (E): *${formatRupiah(stats.userNetProfit)}*\n`;
+  text += `• *Sisa Tagihan (A + E - B): ${formatRupiah(stats.outstandingBalance)}*\n\n`;
+
+  text += `🏦 *Status Saldo RDN:*\n`;
+  text += `• Dana Menganggur di RDN: *${formatRupiah(stats.liquidCashBalance)}*\n`;
+  text += `• Modal Terkunci (Unsold): *${formatRupiah(stats.activeUnsoldCost)}*\n\n`;
+
+  if (orders.length > 0) {
+    text += `📈 *Daftar Saham yang Diikuti:*\n`;
+    orders.forEach((o, index) => {
+      const stock = stocks.find(s => s.id === o.stockId);
+      if (!stock) return;
+
+      let statusText = o.status;
+      if (o.status === 'ordered') statusText = 'Ordered';
+      else if (o.status === 'allotted') statusText = 'Allotted';
+      else if (o.status === 'not_allotted') statusText = 'Not Allotted';
+      else if (o.status === 'sold') statusText = 'Sold';
+
+      let profit = 0;
+      if (o.status === 'sold') {
+        const allottedCost = o.lotAllotted * 100 * stock.ipoPrice;
+        const brokerFee = o.sellBrokerFee || 0;
+        const exchangeFee = o.sellExchangeFee || 0;
+        profit = (o.lotAllotted * 100 * o.sellPrice) - allottedCost - brokerFee - exchangeFee;
+      }
+
+      const profitDetail = o.status === 'sold' ? ` | Untung: ${formatRupiah(profit)}` : '';
+      text += `${index + 1}. *${stock.code}* - Pesan: ${o.lotOrdered} Lot | Dapat: ${o.status !== 'ordered' ? `${o.lotAllotted} Lot` : '-'} ${profitDetail} | Status: _${statusText}_\n`;
+    });
+  } else {
+    text += `📈 *Daftar Saham:* Belum ada pemesanan saham untuk akun ini.`;
+  }
+
+  text += `\n_Dikirim dari Aplikasi IPO Tracker_`;
+
+  // Coba Web Share API bawaan HP
+  if (navigator.share) {
+    navigator.share({
+      title: `Laporan Detail Nominee: ${stats.name}`,
+      text: text
+    }).catch(err => {
+      console.log('Share cancelled or failed', err);
+    });
+  } else {
+    // Fallback ke Salin ke Clipboard jika di desktop/browser lawas
+    navigator.clipboard.writeText(text).then(() => {
+      showCustomToast('Laporan disalin ke papan klip!', 'success');
+    }).catch(err => {
+      console.error('Failed to copy', err);
+      showCustomToast('Gagal menyalin laporan.', 'error');
+    });
+  }
 }
 
 // Populates dropdown lists inside modals

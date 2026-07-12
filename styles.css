@@ -1064,10 +1064,6 @@ textarea {
 }
 
 @media (max-width: 600px) {
-  /* Prevent horizontal scrolling and auto-zoom on mobile */
-  html, body {
-    overflow-x: hidden !important;
-  }
 
   /* Sidebar to Bottom Nav for Mobile Phones */
   .sidebar {
@@ -1202,13 +1198,76 @@ textarea {
     margin: 0.5rem !important;
     max-height: 90vh !important;
   }
-
+  .modal-header {
+    padding: 0.85rem 1rem !important;
+  }
+  .modal-header h2 {
+    font-size: 1.05rem !important;
+  }
+  .modal-close {
+    font-size: 1.35rem !important;
+  }
   .modal-body {
     padding: 1rem !important;
   }
-
   .modal-footer {
-    padding: 1rem !important;
+    padding: 0.85rem 1rem !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Form compactness overrides on mobile */
+  .form-group {
+    margin-bottom: 0.85rem !important;
+  }
+  label {
+    font-size: 0.72rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+  
+  /* Input fields, select dropdowns, and textareas — 16px is required to prevent iOS zoom-on-focus */
+  input, select, textarea {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 16px !important;
+    border-radius: 6px !important;
+  }
+  select option {
+    font-size: 16px !important;
+  }
+  textarea {
+    min-height: 60px !important;
+  }
+
+  /* Modal footer buttons */
+  .modal-footer .btn {
+    padding: 0.45rem 0.85rem !important;
+    font-size: 0.8rem !important;
+    min-height: 0 !important;
+  }
+
+  /* Subtexts and details inside forms */
+  .modal-body .kpi-subtext,
+  .modal-body span[id*="value"],
+  .modal-body span[id*="label"],
+  .modal-body p {
+    font-size: 0.72rem !important;
+  }
+  #sell-calculation-details {
+    padding: 0.75rem !important;
+    font-size: 0.72rem !important;
+    line-height: 1.45 !important;
+  }
+  
+  /* Search bars and filters on all tabs */
+  .search-input-wrapper input {
+    padding: 0.5rem 0.75rem 0.5rem 2.25rem !important;
+    font-size: 16px !important;
+  }
+  .search-input-wrapper i {
+    left: 0.85rem !important;
+  }
+  .filter-select {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 16px !important;
   }
 
   .form-row {
@@ -2134,16 +2193,23 @@ body.light-theme .nav-links li:nth-child(4) .nav-item i {
     transform: scale(1.05) !important;
   }
 
-  /* Settings buttons responsive padding */
+  /* Settings buttons responsive padding — display as a 2x2 grid to prevent horizontal overflow */
+  .settings-segments {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.35rem !important;
+    overflow-x: visible !important;
+  }
+
   .settings-segment-btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.78rem;
-    gap: 0.35rem;
+    padding: 0.5rem 0.5rem !important;
+    font-size: 0.76rem !important;
+    gap: 0.25rem !important;
   }
 
   /* Settings page mobile overrides to prevent zoom and horizontal overflow */
   .settings-segment-content {
-    padding: 1rem !important;
+    padding: 0.75rem !important;
   }
   #settings-segment-cloud div[style*="display: flex; gap: 1rem; flex-wrap: wrap;"] {
     flex-direction: column !important;
@@ -2188,14 +2254,20 @@ body.light-theme .nav-links li:nth-child(4) .nav-item i {
   #table-dashboard-nominees td {
     display: revert !important;
   }
+  #table-dashboard-nominees th,
   #table-dashboard-nominees td {
     padding: 0.4rem 0.25rem !important;
     border-bottom: 1px solid var(--glass-border) !important;
     font-size: 0.72rem !important;
-    padding-left: 0 !important;
     text-align: left !important;
   }
+  #table-dashboard-nominees th:first-child,
+  #table-dashboard-nominees td:first-child {
+    padding-left: 0.75rem !important;
+  }
+  #table-dashboard-nominees th.text-right,
   #table-dashboard-nominees td.text-right {
+    padding-right: 0.75rem !important;
     text-align: right !important;
   }
 }
