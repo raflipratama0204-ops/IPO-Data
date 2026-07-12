@@ -7,7 +7,7 @@
   <title>IPO Account Hub - Database Portofolio Akun</title>
   <!-- Google Fonts & FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css?v=3.10">
+  <link rel="stylesheet" href="styles.css?v=3.11">
   
   <!-- Mobile Home Screen (Add to Home Screen) Icons & Settings -->
   <link rel="icon" type="image/png" href="Logo IPO Tracker.png">
@@ -618,6 +618,23 @@
               <i class="fa-solid fa-shield-halved"></i> Manajemen Data & Keamanan
             </h3>
             
+            <!-- Cadangan & Pemulihan Manual -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 1.5rem;">
+              <div>
+                <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">Cadangan & Pemulihan Manual</h4>
+                <p class="kpi-subtext" style="margin: 0; font-size: 0.75rem;">Ekspor data lokal Anda menjadi berkas JSON, atau impor cadangan JSON lama dari Google Drive / perangkat lain.</p>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <input type="file" id="input-import-db" accept=".json" style="display: none;">
+                <button class="btn btn-secondary btn-sm" id="btn-import-database" style="font-size: 0.8rem; padding: 0.5rem 1rem;">
+                  <i class="fa-solid fa-file-import"></i> Impor JSON
+                </button>
+                <button class="btn btn-primary btn-sm" id="btn-export-database" style="font-size: 0.8rem; padding: 0.5rem 1rem;">
+                  <i class="fa-solid fa-file-export"></i> Ekspor JSON
+                </button>
+              </div>
+            </div>
+
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
               <div>
                 <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;" id="reset-data-title">Kosongkan Database</h4>
@@ -1117,11 +1134,11 @@
         document.body.appendChild(script);
       }
       // Memuat db.js -> translations.js -> google-sync.js -> ui-render.js -> app.js
-      loadScript('js/firebase-config.js?v=3.10', function(configSuccess) {
-        loadScript('js/db.js?v=3.10', function(dbSuccess) {
-          loadScript('js/translations.js?v=3.10', function(transSuccess) {
-            loadScript('js/ui-render.js?v=3.10', function(uiSuccess) {
-              loadScript('js/app.js?v=3.10', function(appSuccess) {
+      loadScript('js/firebase-config.js?v=3.11', function(configSuccess) {
+        loadScript('js/db.js?v=3.11', function(dbSuccess) {
+          loadScript('js/translations.js?v=3.11', function(transSuccess) {
+            loadScript('js/ui-render.js?v=3.11', function(uiSuccess) {
+              loadScript('js/app.js?v=3.11', function(appSuccess) {
                 // Cek apakah database, terjemahan, renderer, dan fungsi utama berhasil dimuat
                 if (typeof db === 'undefined' || typeof UI_TRANSLATIONS === 'undefined' || typeof renderDashboard === 'undefined' || typeof refreshAll === 'undefined') {
                   const errDiv = document.createElement('div');
@@ -1140,11 +1157,11 @@
                   errDiv.innerHTML = '<strong>PENTING:</strong> Berkas logika (<code>db.js</code>, <code>translations.js</code>, <code>ui-render.js</code>, atau <code>app.js</code>) gagal dimuat! Pastikan berkas-berkas tersebut sudah diunggah ke hosting Anda.';
                   document.body.appendChild(errDiv);
                 }
-              }, 'app.js?v=3.10');
-            }, 'ui-render.js?v=3.10');
-          }, 'translations.js?v=3.10');
-        }, 'db.js?v=3.10');
-      }, 'firebase-config.js?v=3.10');
+              }, 'app.js?v=3.11');
+            }, 'ui-render.js?v=3.11');
+          }, 'translations.js?v=3.11');
+        }, 'db.js?v=3.11');
+      }, 'firebase-config.js?v=3.11');
     })();
   </script>
 

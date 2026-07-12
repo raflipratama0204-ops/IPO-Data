@@ -1409,6 +1409,58 @@ function setupSettingsHandlers() {
     });
   }
   
+  const btnExport = document.getElementById('btn-export-database');
+  const btnImport = document.getElementById('btn-import-database');
+  const inputImport = document.getElementById('input-import-db');
+
+  if (btnExport) {
+    btnExport.addEventListener('click', () => {
+      const dataStr = db.exportDatabase();
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ipo_account_db_export.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showCustomToast('Data berhasil diekspor!', 'success');
+    });
+  }
+
+  if (btnImport && inputImport) {
+    btnImport.addEventListener('click', () => {
+      inputImport.click();
+    });
+
+    inputImport.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const text = event.target.result;
+        const confirmText = 'Apakah Anda yakin ingin mengimpor database ini? Data lokal Anda saat ini akan DITIMPA secara keseluruhan.';
+        const confirm = await showCustomConfirm(confirmText, 'Konfirmasi Impor Database');
+        if (!confirm) {
+          inputImport.value = '';
+          return;
+        }
+
+        const success = db.importDatabase(text);
+        if (success) {
+          refreshAll();
+          showCustomToast('Database berhasil diimpor dan disinkronkan ke Cloud!', 'success');
+        } else {
+          showCustomAlert('Format berkas cadangan JSON tidak valid atau rusak.');
+        }
+        inputImport.value = '';
+      };
+      reader.readAsText(file);
+    });
+  }
+
   if (btnReset) {
     btnReset.addEventListener('click', async () => {
       const lang = localStorage.getItem('app_lang') || 'id';
@@ -1439,7 +1491,6 @@ function setupSettingsHandlers() {
             }
           }).catch(e => console.error("Firebase reset signOut error:", e));
         }
-
         
         refreshAll();
       }
