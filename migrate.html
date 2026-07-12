@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Migrasi Database IPO Tracker</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #101524;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2.5rem;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 500px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #38bdf8;
+    }
+    p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 2rem;
+    }
+    .btn {
+      background: #38bdf8;
+      color: #0f172a;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: #0ea5e9;
+      transform: translateY(-1px);
+    }
+    .status {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #f43f5e;
+    }
+    .success {
+      color: #10b981;
+    }
+  </style>
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+  <div class="card">
+    <h1>Alat Pemulih Data Google Drive</h1>
+    <p>
+      Karena berkas cadangan Google Drive disimpan di dalam folder khusus aplikasi yang tersembunyi (agar aman dari penghapusan tidak sengaja), Anda tidak bisa mencarinya di Google Drive biasa.<br><br>
+      Gunakan tombol di bawah ini untuk mengunduh berkas cadangan <strong>ipo_account_db.json</strong> dari folder tersembunyi tersebut ke folder Downloads laptop Anda.
+    </p>
+
+    <button class="btn" id="btn-migrate">
+      Hubungkan Google Drive & Unduh File
+    </button>
+
+    <div class="status" id="status-text"></div>
+  </div>
+
+  <script>
+    const CLIENT_ID = '409883088386-ar3ej7spjkl2t0hglmopa9fotejh1nt6.apps.googleusercontent.com';
+    const FILE_NAME = 'ipo_account_db.json';
+    const btn = document.getElementById('btn-migrate');
+    const statusText = document.getElementById('status-text');
+
+    btn.addEventListener('click', () => {
+      statusText.textContent = 'Menghubungkan ke Google...';
+      statusText.className = 'status';
+
+      try {
+        const client = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: 'https://www.googleapis.com/auth/drive.appdata',
+          callback: async (response) => {
+            if (response.error) {
+              statusText.textContent = 'Gagal menghubungkan akun Google: ' + response.error;
+              return;
+            }
+
+            const token = response.access_token;
+            statusText.textContent = 'Token berhasil didapatkan. Mencari berkas cadangan...';
+            statusText.className = 'status success';
+
+            try {
+              // 1. Cari file di appDataFolder
+              const query = encodeURIComponent(`name = '${FILE_NAME}' and trashed = false`);
+              const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${query}&fields=files(id,name)`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+
+              if (!searchRes.ok) {
+                throw new Error('Gagal mengakses Drive: ' + await searchRes.text());
+              }
+
+              const searchData = await searchRes.json();
+              if (!searchData.files || searchData.files.length === 0) {
+                statusText.textContent = 'Tidak ditemukan file cadangan lama di Google Drive Anda.';
+                statusText.className = 'status';
+                return;
+              }
+
+              const fileId = searchData.files[0].id;
+              statusText.textContent = 'Berkas ditemukan! Mengunduh data...';
+
+              // 2. Unduh konten file
+              const downloadRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+
+              if (!downloadRes.ok) {
+                throw new Error('Gagal mengunduh berkas: ' + await downloadRes.text());
+              }
+
+              const fileContent = await downloadRes.json();
+
+              // 3. Pemicu unduhan otomatis di browser
+              const blob = new Blob([JSON.stringify(fileContent, null, 2)], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'ipo_account_db_backup.json';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+
+              statusText.textContent = 'Selesai! Berkas ipo_account_db_backup.json berhasil diunduh ke folder Downloads Anda.';
+              statusText.className = 'status success';
+            } catch (err) {
+              console.error(err);
+              statusText.textContent = 'Terjadi kesalahan: ' + err.message;
+              statusText.className = 'status';
+            }
+          }
+        });
+
+        client.requestAccessToken();
+      } catch (e) {
+        statusText.textContent = 'Gagal memuat sistem Google: ' + e.message;
+      }
+    });
+  </script>
+
+</body>
+</html>
