@@ -948,83 +948,89 @@ function openNomineeDetailModal(nomineeId) {
   openModal('modal-nominee-detail');
 }
 
-function shareNomineeReport() {
+async function shareNomineeReport() {
   const nomineeId = this.getAttribute('data-nominee-id');
   if (!nomineeId) return;
 
   const stats = db.getNomineeStats(nomineeId);
   if (!stats) return;
 
-  const orders = db.getOrders().filter(o => o.nomineeId === nomineeId);
-  const stocks = db.getStocks();
+  // Temukan elemen modal nominee detail
+  const modalEl = document.querySelector('#modal-nominee-detail .modal');
+  const headerControls = document.querySelector('#modal-nominee-detail .modal-header div');
 
-  const lang = localStorage.getItem('app_lang') || 'id';
-  const today = new Date().toLocaleDateString(lang === 'id' ? 'id-ID' : 'en-US', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
-
-  let text = `📊 *LAPORAN DETAIL PORTOFOLIO: ${stats.name.toUpperCase()}*\n`;
-  text += `📅 _Tanggal: ${today}_\n\n`;
-
-  text += `💰 *Ringkasan Keuangan:*\n`;
-  text += `• Total Dana Ditransfer (A): *${formatRupiah(stats.totalTransferred)}*\n`;
-  text += `• Total Dana Dikembalikan (B): *${formatRupiah(stats.totalReturned)}*\n`;
-  text += `• Total Keuntungan Saham (C): *${formatRupiah(stats.totalProfit)}*\n`;
-  text += `• Bagi Hasil Nominee (D) (${stats.profitSharePct || 0}%): *${formatRupiah(stats.profitShareAmount)}*\n`;
-  text += `• Keuntungan Bersih Saya (E): *${formatRupiah(stats.userNetProfit)}*\n`;
-  text += `• *Sisa Tagihan (A + E - B): ${formatRupiah(stats.outstandingBalance)}*\n\n`;
-
-  text += `🏦 *Status Saldo RDN:*\n`;
-  text += `• Dana Menganggur di RDN: *${formatRupiah(stats.liquidCashBalance)}*\n`;
-  text += `• Modal Terkunci (Unsold): *${formatRupiah(stats.activeUnsoldCost)}*\n\n`;
-
-  if (orders.length > 0) {
-    text += `📈 *Daftar Saham yang Diikuti:*\n`;
-    orders.forEach((o, index) => {
-      const stock = stocks.find(s => s.id === o.stockId);
-      if (!stock) return;
-
-      let statusText = o.status;
-      if (o.status === 'ordered') statusText = 'Ordered';
-      else if (o.status === 'allotted') statusText = 'Allotted';
-      else if (o.status === 'not_allotted') statusText = 'Not Allotted';
-      else if (o.status === 'sold') statusText = 'Sold';
-
-      let profit = 0;
-      if (o.status === 'sold') {
-        const allottedCost = o.lotAllotted * 100 * stock.ipoPrice;
-        const brokerFee = o.sellBrokerFee || 0;
-        const exchangeFee = o.sellExchangeFee || 0;
-        profit = (o.lotAllotted * 100 * o.sellPrice) - allottedCost - brokerFee - exchangeFee;
-      }
-
-      const profitDetail = o.status === 'sold' ? ` | Untung: ${formatRupiah(profit)}` : '';
-      text += `${index + 1}. *${stock.code}* - Pesan: ${o.lotOrdered} Lot | Dapat: ${o.status !== 'ordered' ? `${o.lotAllotted} Lot` : '-'} ${profitDetail} | Status: _${statusText}_\n`;
-    });
-  } else {
-    text += `📈 *Daftar Saham:* Belum ada pemesanan saham untuk akun ini.`;
+  if (!modalEl) {
+    showCustomToast('Gagal menemukan elemen modal detail.', 'error');
+    return;
   }
 
-  text += `\n_Dikirim dari Aplikasi IPO Tracker_`;
+  // Tampilkan notifikasi loading kecil
+  showCustomToast('Sedang membuat gambar laporan...', 'info');
 
-  // Coba Web Share API bawaan HP
-  if (navigator.share) {
-    navigator.share({
-      title: `Laporan Detail Nominee: ${stats.name}`,
-      text: text
-    }).catch(err => {
-      console.log('Share cancelled or failed', err);
+  try {
+    // Sembunyikan sementara tombol Share dan Close agar tidak masuk ke screenshot
+    if (headerControls) {
+      headerControls.style.opacity = '0';
+    }
+
+    // Jalankan tangkapan layar menggunakan html2canvas
+    const isLightTheme = document.body.classList.contains('light-theme');
+    const canvas = await html2canvas(modalEl, {
+      scale: 2, // Meningkatkan resolusi agar teks tajam
+      useCORS: true,
+      backgroundColor: isLightTheme ? '#f8fafc' : '#080b11', // Menyesuaikan warna latar belakang tema
+      logging: false
     });
-  } else {
-    // Fallback ke Salin ke Clipboard jika di desktop/browser lawas
-    navigator.clipboard.writeText(text).then(() => {
-      showCustomToast('Laporan disalin ke papan klip!', 'success');
-    }).catch(err => {
-      console.error('Failed to copy', err);
-      showCustomToast('Gagal menyalin laporan.', 'error');
-    });
+
+    // Pulihkan tombol header kembali
+    if (headerControls) {
+      headerControls.style.opacity = '1';
+    }
+
+    // Konversi canvas menjadi file PNG blob
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        showCustomToast('Gagal menghasilkan gambar laporan.', 'error');
+        return;
+      }
+
+      const nomineeSafeName = stats.name.replace(/\s+/g, '_');
+      const filename = `Laporan_${nomineeSafeName}.png`;
+      const file = new File([blob], filename, { type: 'image/png' });
+
+      // Coba bagikan menggunakan Web Share API
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: `Laporan Detail Nominee: ${stats.name}`,
+            text: `Berikut adalah laporan portofolio akun nominee ${stats.name}.`
+          });
+        } catch (shareErr) {
+          console.log('Share dibatalkan atau gagal', shareErr);
+        }
+      } else {
+        // Fallback: Unduh gambar secara otomatis di desktop / browser yang tidak mendukung file share
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        
+        showCustomToast('Gambar laporan berhasil diunduh!', 'success');
+        
+        // Bersihkan object URL
+        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      }
+    }, 'image/png');
+
+  } catch (err) {
+    console.error('html2canvas error', err);
+    showCustomToast('Terjadi kesalahan saat memproses gambar.', 'error');
+    
+    // Pastikan tombol dipulihkan jika error terjadi di tengah jalan
+    if (headerControls) {
+      headerControls.style.opacity = '1';
+    }
   }
 }
 
