@@ -1064,10 +1064,15 @@ textarea {
 }
 
 @media (max-width: 600px) {
+  /* Prevent horizontal scrolling and auto-zoom on mobile */
+  html, body {
+    overflow-x: hidden !important;
+  }
+
   /* Sidebar to Bottom Nav for Mobile Phones */
   .sidebar {
     width: 100% !important;
-    height: 60px !important;
+    height: 52px !important;
     flex-direction: row !important;
     position: fixed !important;
     bottom: 0 !important;
@@ -1100,12 +1105,12 @@ textarea {
   .nav-item {
     flex-direction: column !important;
     gap: 0 !important;
-    padding: 0.75rem !important;
+    padding: 0.5rem !important;
     border-radius: var(--radius-md) !important;
   }
   
   .nav-item i {
-    font-size: 1.35rem !important;
+    font-size: 1.15rem !important;
   }
   
   .nav-text {
@@ -1173,10 +1178,23 @@ textarea {
     font-size: 0.6rem !important;
   }
 
-  /* Detail modal stacked layout */
+  /* Detail modal 2 columns layout on mobile */
   .detail-grid {
-    grid-template-columns: 1fr !important;
-    gap: 1rem !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+  .detail-block {
+    padding: 0.65rem 0.75rem !important;
+  }
+  .detail-label {
+    font-size: 0.62rem !important;
+  }
+  .detail-val {
+    font-size: 0.95rem !important;
+  }
+  #detail-liquid-cash,
+  #detail-active-unsold {
+    font-size: 0.9rem !important;
   }
 
   /* Modal styling for mobile screen bounds */
@@ -1347,84 +1365,103 @@ textarea {
 
   /* === Dashboard: tagihan per akun — perkecil font agar tidak mepet === */
   #list-dashboard-nominees td {
-    font-size: 0.75rem !important;
-    padding: 0.4rem 0.25rem !important;
+    font-size: 0.70rem !important;
+    padding: 0.35rem 0.25rem !important;
     padding-left: 0 !important; /* tidak pakai label pseudo-element */
   }
   #list-dashboard-nominees td:before {
     display: none !important; /* tidak perlu label kiri untuk tabel mini ini */
   }
   #list-dashboard-nominees tr {
-    padding: 0.4rem 0.6rem !important;
+    padding: 0.35rem 0.5rem !important;
   }
   #list-dashboard-nominees td strong {
-    font-size: 0.76rem !important;
+    font-size: 0.72rem !important;
   }
   #list-dashboard-nominees td div {
-    font-size: 0.65rem !important;
-    line-height: 1.3 !important;
+    font-size: 0.60rem !important;
+    line-height: 1.25 !important;
+  }
+  #list-dashboard-nominees td.text-outstanding {
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
   }
 
   /* === Dashboard: log keuangan terkini — nilai rupiah rata kanan, bukan tengah === */
   #list-dashboard-transfers td {
-    padding-left: 0 !important;
-    justify-content: space-between !important;
+    padding: 0 !important;
+    border: none !important;
     font-size: 0.75rem !important;
+    min-height: 0 !important;
+    display: flex !important;
+    align-items: center !important;
   }
   #list-dashboard-transfers td:before {
     display: none !important;
   }
   #list-dashboard-transfers tr {
     display: grid !important;
-    grid-template-columns: auto auto !important;
-    grid-template-rows: auto auto !important;
-    padding: 0.6rem 0.75rem !important;
-    gap: 0.2rem 0.5rem !important;
+    grid-template-columns: 1fr auto !important;
+    grid-template-rows: auto auto auto !important;
+    padding: 0.65rem 0.85rem !important;
+    gap: 0.35rem 0.5rem !important;
     align-items: center !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: var(--radius-md) !important;
+    background: rgba(255, 255, 255, 0.01) !important;
+    margin-bottom: 0.75rem !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
   }
-  /* Tanggal: baris 1 kiri */
-  #list-dashboard-transfers td:nth-child(1) {
-    grid-column: 1;
-    grid-row: 1;
-    text-align: left !important;
-    color: var(--text-muted) !important;
-    font-size: 0.7rem !important;
-    justify-content: flex-start !important;
+  body.light-theme #list-dashboard-transfers tr {
+    background: rgba(0, 0, 0, 0.015) !important;
+    border-color: rgba(15, 23, 42, 0.08) !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
   }
-  /* Badge jenis: baris 1 kanan */
-  #list-dashboard-transfers td:nth-child(3) {
-    grid-column: 2;
-    grid-row: 1;
-    text-align: right !important;
-    justify-content: flex-end !important;
-  }
-  /* Nama nominee: baris 2 kiri */
+  /* Nominee (td 2): row 1, col 1 */
   #list-dashboard-transfers td:nth-child(2) {
-    grid-column: 1;
-    grid-row: 2;
-    text-align: left !important;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
     justify-content: flex-start !important;
-    font-size: 0.8rem !important;
+    text-align: left !important;
+    font-size: 0.82rem !important;
+    font-weight: 700 !important;
   }
-  /* Nilai rupiah: baris 2 kanan — rata kanan */
+  /* Amount (td 4): row 1, col 2 */
   #list-dashboard-transfers td:nth-child(4) {
-    grid-column: 2;
-    grid-row: 2;
-    text-align: right !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
     justify-content: flex-end !important;
-    font-weight: 600 !important;
-    font-size: 0.8rem !important;
+    text-align: right !important;
+    font-size: 0.82rem !important;
+    font-weight: 700 !important;
   }
-  /* Catatan: baris 3 full width */
-  #list-dashboard-transfers td:nth-child(5) {
-    grid-column: 1 / -1;
-    grid-row: 3;
-    text-align: left !important;
+  /* Date (td 1): row 2, col 1 */
+  #list-dashboard-transfers td:nth-child(1) {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
     justify-content: flex-start !important;
+    text-align: left !important;
+    font-size: 0.72rem !important;
     color: var(--text-muted) !important;
-    font-size: 0.68rem !important;
-    border-bottom: none !important;
-    padding-top: 0 !important;
+  }
+  /* Badge jenis: row 2, col 2 */
+  #list-dashboard-transfers td:nth-child(3) {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    justify-content: flex-end !important;
+    text-align: right !important;
+  }
+  /* Catatan: row 3, span both columns */
+  #list-dashboard-transfers td:nth-child(5) {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+    font-size: 0.72rem !important;
+    color: var(--text-secondary) !important;
+    border-top: 1px dashed var(--glass-border) !important;
+    padding-top: 0.25rem !important;
+    margin-top: 0.15rem !important;
   }
   
   /* Stocks Table Labels */
@@ -1458,6 +1495,14 @@ textarea {
   #list-orders tr:not(.nominee-group-header) td:nth-of-type(8):before { content: "Keuntungan" !important; }
   #list-orders tr:not(.nominee-group-header) td:nth-of-type(9):before { content: "Status" !important; }
   #list-orders tr:not(.nominee-group-header) td:nth-of-type(10):before { content: "Aksi" !important; }
+
+  /* Nominee Detail Modal Orders Table Labels */
+  #detail-nominee-orders td:nth-of-type(1):before { content: "Saham" !important; }
+  #detail-nominee-orders td:nth-of-type(2):before { content: "Pesan (Lot)" !important; }
+  #detail-nominee-orders td:nth-of-type(3):before { content: "Dapat (Lot)" !important; }
+  #detail-nominee-orders td:nth-of-type(4):before { content: "Refund" !important; }
+  #detail-nominee-orders td:nth-of-type(5):before { content: "Keuntungan" !important; }
+  #detail-nominee-orders td:nth-of-type(6):before { content: "Status" !important; }
 
   /* Group header custom mobile card layout */
   .nominee-group-header {
@@ -2055,7 +2100,7 @@ body.light-theme .nav-links li:nth-child(4) .nav-item i {
 
   .nav-links li:nth-child(4) .nav-item {
     position: relative;
-    top: -14px;
+    top: -10px !important;
     padding: 0 !important;
     border-radius: 0 !important;
     /* Reset desktop gradient box — hanya icon circle yang menonjol, bukan container-nya */
@@ -2065,9 +2110,9 @@ body.light-theme .nav-links li:nth-child(4) .nav-item i {
   }
 
   .nav-links li:nth-child(4) .nav-item i {
-    width: 52px !important;
-    height: 52px !important;
-    font-size: 1.55rem !important;
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 1.3rem !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -2096,6 +2141,19 @@ body.light-theme .nav-links li:nth-child(4) .nav-item i {
     gap: 0.35rem;
   }
 
+  /* Settings page mobile overrides to prevent zoom and horizontal overflow */
+  .settings-segment-content {
+    padding: 1rem !important;
+  }
+  #settings-segment-cloud div[style*="display: flex; gap: 1rem; flex-wrap: wrap;"] {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  #settings-segment-cloud button {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
   /* Light Theme overrides for bottom nav in mobile */
   body.light-theme .sidebar {
     background: rgba(248, 250, 252, 0.96) !important;
@@ -2114,6 +2172,14 @@ body.light-theme .nav-links li:nth-child(4) .nav-item i {
   body.light-theme .nav-item.active i {
     color: var(--primary) !important;
   }
+  /* Reset dashboard button gradient/borders on mobile light theme */
+  body.light-theme .nav-links li:nth-child(4) .nav-item,
+  body.light-theme .nav-links li:nth-child(4) .nav-item:hover,
+  body.light-theme .nav-links li:nth-child(4) .nav-item.active {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
 
   /* Dashboard: Nominees outstanding balance table (Tagihan Per Akun) */
   #table-dashboard-nominees,
@@ -2123,84 +2189,14 @@ body.light-theme .nav-links li:nth-child(4) .nav-item i {
     display: revert !important;
   }
   #table-dashboard-nominees td {
-    padding: 0.65rem 0.25rem !important;
+    padding: 0.4rem 0.25rem !important;
     border-bottom: 1px solid var(--glass-border) !important;
-    font-size: 0.8rem !important;
+    font-size: 0.72rem !important;
     padding-left: 0 !important;
     text-align: left !important;
   }
   #table-dashboard-nominees td.text-right {
     text-align: right !important;
-  }
-
-  /* Dashboard: Recent Financial Logs (Aktivitas Log Keuangan) */
-  #list-dashboard-transfers tr {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 0.5rem 0 !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-    background: none !important;
-    border-radius: 0 !important;
-    margin-bottom: 0 !important;
-    box-shadow: none !important;
-  }
-  body.light-theme #list-dashboard-transfers tr {
-    border-bottom-color: rgba(15, 23, 42, 0.08) !important;
-  }
-  
-  #list-dashboard-transfers td {
-    border: none !important;
-    padding: 0 !important;
-    padding-left: 0 !important;
-    min-height: 0 !important;
-  }
-  #list-dashboard-transfers td:before {
-    display: none !important;
-  }
-
-  /* Row 1 items: Nominee (td 2) and Amount (td 4) */
-  #list-dashboard-transfers td:nth-child(2) {
-    order: 1 !important;
-    flex-basis: 50% !important;
-    text-align: left !important;
-    font-size: 0.82rem !important;
-  }
-  #list-dashboard-transfers td:nth-child(4) {
-    order: 2 !important;
-    flex-basis: 50% !important;
-    text-align: right !important;
-    font-size: 0.82rem !important;
-    font-weight: 700 !important;
-  }
-  
-  /* Row 2 items: Date (td 1), Type (td 3), Notes (td 5) */
-  #list-dashboard-transfers td:nth-child(1) {
-    order: 3 !important;
-    flex-basis: auto !important;
-    font-size: 0.72rem !important;
-    color: var(--text-muted) !important;
-    margin-top: 0.25rem !important;
-    margin-right: 0.5rem !important;
-  }
-  #list-dashboard-transfers td:nth-child(3) {
-    order: 4 !important;
-    flex-basis: auto !important;
-    font-size: 0.72rem !important;
-    margin-top: 0.25rem !important;
-    margin-right: 0.5rem !important;
-  }
-  #list-dashboard-transfers td:nth-child(5) {
-    order: 5 !important;
-    flex-grow: 1 !important;
-    font-size: 0.72rem !important;
-    color: var(--text-secondary) !important;
-    margin-top: 0.25rem !important;
-    text-align: right !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
   }
 }
 

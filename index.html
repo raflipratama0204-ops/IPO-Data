@@ -25,6 +25,16 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
+  <!-- Instantly apply light theme if saved to prevent flashing -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('app_theme') || 'dark';
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+      }
+    })();
+  </script>
+
   <!-- Error overlay for debugging hosted environment -->
   <script>
     window.addEventListener('error', function(e) {
