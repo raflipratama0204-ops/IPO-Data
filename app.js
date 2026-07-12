@@ -1425,24 +1425,21 @@ function setupSettingsHandlers() {
         });
         showCustomAlert(dict.alertResetSuccess);
         
-        // Disconnect google sync so we do not overwrite cloud data
-        if (typeof googleSync !== 'undefined' && googleSync.isConnected()) {
-          localStorage.removeItem('user_mode');
-          localStorage.removeItem('google_connected');
-          if (syncPollInterval) {
-            clearInterval(syncPollInterval);
-            syncPollInterval = null;
-          }
-          googleSync.disconnect();
-          
-          const loginOverlay = document.getElementById('login-overlay');
-          if (loginOverlay) {
-            loginOverlay.style.display = 'flex';
-            setTimeout(() => {
-              loginOverlay.classList.remove('hidden');
-            }, 50);
-          }
+        // Disconnect firebase so we do not overwrite cloud data
+        if (typeof firebase !== 'undefined' && firebase.auth().currentUser) {
+          firebase.auth().signOut().then(() => {
+            localStorage.removeItem('user_mode');
+            
+            const loginOverlay = document.getElementById('login-overlay');
+            if (loginOverlay) {
+              loginOverlay.style.display = 'flex';
+              setTimeout(() => {
+                loginOverlay.classList.remove('hidden');
+              }, 50);
+            }
+          }).catch(e => console.error("Firebase reset signOut error:", e));
         }
+
         
         refreshAll();
       }
@@ -1593,47 +1590,7 @@ function showCustomConfirm(message, confirmTitle) {
   });
 }
 
-// ----------------- GOOGLE DRIVE SYNC HANDLERS -----------------
-
-function startGoogleSyncPolling() {
-  if (typeof googleSync === 'undefined') return;
-  if (syncPollInterval) clearInterval(syncPollInterval);
-  
-  syncPollInterval = setInterval(async () => {
-    // Only poll if connected and sync is enabled
-    if (!googleSync.isConnected() || !googleSync.isSyncEnabled()) return;
-    
-    try {
-      const status = await googleSync.getCloudStatus();
-      if (status.cloudFile && status.cloudFile.modifiedTime) {
-        const cloudModifiedTime = new Date(status.cloudFile.modifiedTime).getTime();
-        
-        // Retrieve last sync time
-        const lastSyncTimeStr = localStorage.getItem('google_last_sync_time');
-        const lastSyncTime = lastSyncTimeStr ? new Date(lastSyncTimeStr).getTime() : 0;
-        
-        // If cloud file is newer by at least 2 seconds (buffer for network delays)
-        if (cloudModifiedTime > lastSyncTime + 2000) {
-          console.log('Menemukan data awan baru di Google Drive. Memulai sinkronisasi otomatis ke lokal...');
-          const data = await googleSync.downloadData();
-          if (data && (data.nominees || data.stocks || data.orders)) {
-            // Save to DB and refresh UI
-            db.saveDB(data);
-            refreshAll();
-            
-            // Save the exact modified time from cloud as our last sync time!
-            localStorage.setItem('google_last_sync_time', status.cloudFile.modifiedTime);
-            updateGoogleSyncUI();
-            
-            showCustomToast('Data portofolio diperbarui dari Cloud!', 'success');
-          }
-        }
-      }
-    } catch (e) {
-      console.warn('Realtime polling background sync error:', e);
-    }
-  }, 12000); // Check every 12 seconds
-}
+// // ----------------- GOOGLE FIREBASE REAL-TIME SYNC HANDLERS -----------------
 
 function showDashboard() {
   const tempStyle = document.getElementById('temp-hide-app');
@@ -1657,181 +1614,112 @@ function bindLoginOverlayButtons() {
       setTimeout(() => {
         loginOverlay.style.display = 'none';
       }, 400); // Wait for transition
+      updateGoogleSyncUI();
     });
 
     btnLoginGoogle.addEventListener('click', () => {
-      if (typeof googleSync === 'undefined') {
-        showCustomAlert('Fitur sinkronisasi Google gagal dimuat. Harap periksa apakah berkas google-sync.js sudah diunggah.');
-        return;
-      }
-      const id = googleSync.getClientId();
-      if (!id) {
-        showCustomAlert('Google Client ID tidak dikonfigurasi. Periksa berkas google-sync.js.');
-        return;
-      }
-      isSigningIn = true; // Set flag to trigger cloud data download upon successful login
-      googleSync.connect();
+      loginWithGoogle();
     });
   }
+}
+
+function loginWithGoogle() {
+  if (typeof firebase === 'undefined') {
+    showCustomAlert('Firebase SDK gagal dimuat. Harap periksa koneksi internet Anda.');
+    return;
+  }
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider).catch(error => {
+    console.error("Firebase Sign-In Error:", error);
+    showCustomAlert("Gagal login menggunakan akun Google: " + error.message);
+  });
+}
+
+function logoutFromFirebase() {
+  if (typeof firebase === 'undefined') return;
+  firebase.auth().signOut().then(() => {
+    localStorage.removeItem('user_mode');
+    showCustomToast('Berhasil keluar dari akun.', 'success');
+  }).catch(error => {
+    console.error("Firebase Sign-Out Error:", error);
+  });
 }
 
 function setupGoogleSync() {
   // Bind login overlay buttons first (so Guest mode always works!)
   bindLoginOverlayButtons();
 
-  if (typeof googleSync === 'undefined') {
-    console.warn('googleSync module is not loaded. Google Drive Sync features are disabled.');
-    return;
-  }
-
-  const btnSaveId = document.getElementById('btn-save-client-id');
-  const inputClientId = document.getElementById('google-client-id');
   const btnConnect = document.getElementById('btn-google-connect');
   const btnDisconnect = document.getElementById('btn-google-disconnect');
-  const btnUpload = document.getElementById('btn-google-upload');
-  const btnDownload = document.getElementById('btn-google-download');
-  const toggleAuto = document.getElementById('google-auto-sync-toggle');
 
-  // Load saved client ID if elements exist
-  if (inputClientId) {
-    inputClientId.value = googleSync.getClientId();
-  }
-
-  // Bind status callback
-  googleSync.registerStatusCallback(updateGoogleSyncUI);
-
-  // Initialize GIS client and check session
-  googleSync.init((status) => {
-    console.log('Google Sync Initialized status:', status);
-    const userMode = localStorage.getItem('user_mode');
-    if (status && status.connected) {
-      // Sesi berhasil dipulihkan
-      updateGoogleSyncUI();
-    } else if (userMode === 'google') {
-      // Pengguna sebelumnya menggunakan Google tapi sesi habis.
-      // Sembunyikan login screen dan biarkan di mode offline sementara.
-      const loginOverlay = document.getElementById('login-overlay');
-      if (loginOverlay) {
-        loginOverlay.classList.add('hidden');
-        loginOverlay.style.display = 'none';
-      }
-      showDashboard();
-      updateGoogleSyncUI();
-    } else {
-      updateGoogleSyncUI();
-    }
-  });
-
-  // Save Client ID handler (if UI exists)
-  if (btnSaveId && inputClientId) {
-    btnSaveId.addEventListener('click', () => {
-      const id = inputClientId.value.trim();
-      if (!id) {
-        showCustomAlert('Silakan masukkan Client ID yang valid.');
-        return;
-      }
-      googleSync.saveClientId(id);
-      showCustomAlert('Google Client ID berhasil disimpan and diinisialisasi.');
-    });
-  }
-
-  // Connect Google Account
+  // Connect Google Account in Settings
   if (btnConnect) {
     btnConnect.addEventListener('click', () => {
-      isSigningIn = true; // Set flag to trigger cloud data check/download
-      googleSync.connect();
+      loginWithGoogle();
     });
   }
 
-  // Disconnect Google Account
+  // Disconnect Google Account in Settings (Log Out)
   if (btnDisconnect) {
     btnDisconnect.addEventListener('click', () => {
-      localStorage.removeItem('user_mode');
-      localStorage.removeItem('google_connected');
-      if (syncPollInterval) {
-        clearInterval(syncPollInterval);
-        syncPollInterval = null;
-      }
-      googleSync.disconnect();
-      
-      const loginOverlay = document.getElementById('login-overlay');
-      if (loginOverlay) {
-        loginOverlay.style.display = 'flex';
-        setTimeout(() => {
-          loginOverlay.classList.remove('hidden');
-        }, 50);
-      }
+      logoutFromFirebase();
     });
   }
 
-  // Manual Upload
-  if (btnUpload) {
-    btnUpload.addEventListener('click', async () => {
-      btnUpload.disabled = true;
-      const originalHtml = btnUpload.innerHTML;
-      btnUpload.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengunggah...';
-      try {
-        const dbData = db.getDB();
-        await googleSync.uploadData(dbData);
-        localStorage.setItem('google_last_sync_time', new Date().toISOString());
-        updateGoogleSyncUI();
-        showCustomAlert('Database berhasil diunggah ke Google Drive.');
-      } catch (err) {
-        console.error(err);
-        showCustomAlert('Gagal mengunggah data: ' + err.message);
-      } finally {
-        btnUpload.disabled = false;
-        btnUpload.innerHTML = originalHtml;
-      }
-    });
-  }
-
-  // Manual Download
-  if (btnDownload) {
-    btnDownload.addEventListener('click', async () => {
-      const confirmText = 'Apakah Anda yakin ingin mengunduh data dari Cloud? Data lokal saat ini akan DITIMPA secara keseluruhan. Silakan lakukan ekspor backup manual terlebih dahulu jika perlu.';
-      const confirm = await showCustomConfirm(confirmText, 'Konfirmasi Unduh Cloud');
-      if (!confirm) return;
-
-      btnDownload.disabled = true;
-      const originalHtml = btnDownload.innerHTML;
-      btnDownload.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengunduh...';
-      try {
-        const data = await googleSync.downloadData();
-        if (data && (data.nominees || data.stocks || data.orders)) {
-          // Save to DB and refresh UI
-          db.saveDB(data);
+  // Monitor Firebase Authentication State
+  if (typeof firebase !== 'undefined') {
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        console.log('Firebase User logged in:', user.email);
+        localStorage.setItem('user_mode', 'google');
+        
+        // Bind real-time Firestore sync
+        db.bindRealtimeSync(user.uid, () => {
           refreshAll();
-          localStorage.setItem('google_last_sync_time', new Date().toISOString());
-          updateGoogleSyncUI();
-          showCustomAlert('Database berhasil diunduh dan dipulihkan dari Google Drive.');
-        } else {
-          throw new Error('Format berkas tidak valid atau kosong.');
+        });
+
+        // Update UI elements for connected state
+        updateGoogleSyncUI();
+        
+        // Hide login overlay if visible
+        const loginOverlay = document.getElementById('login-overlay');
+        if (loginOverlay) {
+          loginOverlay.classList.add('hidden');
+          setTimeout(() => {
+            loginOverlay.style.display = 'none';
+          }, 400);
         }
-      } catch (err) {
-        console.error(err);
-        showCustomAlert('Gagal mengunduh data: ' + err.message);
-      } finally {
-        btnDownload.disabled = false;
-        btnDownload.innerHTML = originalHtml;
+        showDashboard();
+      } else {
+        console.log('Firebase User logged out.');
+        const userMode = localStorage.getItem('user_mode');
+        
+        if (userMode === 'guest') {
+          // Hide login overlay for Guest Mode
+          const loginOverlay = document.getElementById('login-overlay');
+          if (loginOverlay) {
+            loginOverlay.classList.add('hidden');
+            loginOverlay.style.display = 'none';
+          }
+          showDashboard();
+        } else {
+          // Show login overlay for disconnected mode
+          const loginOverlay = document.getElementById('login-overlay');
+          if (loginOverlay && loginOverlay.classList.contains('hidden')) {
+            loginOverlay.style.display = 'flex';
+            setTimeout(() => {
+              loginOverlay.classList.remove('hidden');
+            }, 50);
+          }
+        }
+        
+        updateGoogleSyncUI();
       }
     });
   }
-
-  // Toggle Auto Sync
-  if (toggleAuto) {
-    toggleAuto.checked = googleSync.isSyncEnabled();
-    toggleAuto.addEventListener('change', (e) => {
-      googleSync.setSyncEnabled(e.target.checked);
-    });
-  }
-
-  // Start background sync polling check
-  startGoogleSyncPolling();
 }
 
 async function updateGoogleSyncUI() {
-  if (typeof googleSync === 'undefined') return;
   const disconnectState = document.getElementById('google-disconnected-state');
   const connectedState = document.getElementById('google-connected-state');
   const syncControls = document.getElementById('google-sync-controls');
@@ -1839,145 +1727,30 @@ async function updateGoogleSyncUI() {
   const userEmailEl = document.getElementById('google-user-email');
   const userPicEl = document.getElementById('google-user-pic');
   const lastSyncEl = document.getElementById('google-last-sync');
-  const autoSyncToggle = document.getElementById('google-auto-sync-toggle');
-  const loginOverlay = document.getElementById('login-overlay');
 
   if (!disconnectState) return;
 
-  const connected = googleSync.isConnected();
+  const user = (typeof firebase !== 'undefined' && firebase.auth()) ? firebase.auth().currentUser : null;
   
-  if (connected) {
+  if (user) {
     disconnectState.style.display = 'none';
     connectedState.style.display = 'flex';
     syncControls.style.display = 'block';
 
-    const user = googleSync.getUserInfo();
-    if (user) {
-      userNameEl.textContent = user.name || 'Pengguna Google';
-      userEmailEl.textContent = user.email || '';
-      userPicEl.src = user.picture || 'https://lh3.googleusercontent.com/a/default-user=s48';
-    }
+    if (userNameEl) userNameEl.textContent = user.displayName || 'Pengguna Google';
+    if (userEmailEl) userEmailEl.textContent = user.email || '';
+    if (userPicEl) userPicEl.src = user.photoURL || 'https://lh3.googleusercontent.com/a/default-user=s48';
 
-    // Hide login overlay if visible
-    if (loginOverlay && !loginOverlay.classList.contains('hidden')) {
-      localStorage.setItem('user_mode', 'google'); // Set preference to google
-      if (isSigningIn) {
-        // Show loading state while checking Google Drive
-        const loginBox = loginOverlay.querySelector('.login-box');
-        const originalContent = loginBox.innerHTML;
-        loginBox.innerHTML = `
-          <div class="login-logo-container" style="margin-bottom: 2rem;">
-            <div class="login-logo-icon">IP</div>
-            <div class="login-logo-text">IPO HUB</div>
-          </div>
-          <div style="margin: 2.5rem 0; text-align: center;">
-            <i class="fa-solid fa-spinner fa-spin" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem;"></i>
-            <p style="font-weight: 600; font-size: 1rem; color: #fff;">Memeriksa data di Google Drive...</p>
-          </div>
-        `;
-
-        try {
-          const status = await googleSync.getCloudStatus();
-          if (status.cloudFile) {
-            // Backup found, download and restore
-            const data = await googleSync.downloadData();
-            if (data && (data.nominees || data.stocks || data.orders)) {
-              db.saveDB(data);
-              refreshAll();
-              localStorage.setItem('google_last_sync_time', new Date().toISOString());
-              console.log('Restored cloud backup on login screen.');
-            }
-          } else {
-            // No backup found, upload current local database as initial backup
-            const currentDB = db.getDB();
-            if (currentDB.nominees.length > 0 || currentDB.stocks.length > 0) {
-              await googleSync.uploadData(currentDB);
-              localStorage.setItem('google_last_sync_time', new Date().toISOString());
-              console.log('Created initial cloud backup.');
-            }
-          }
-        } catch (e) {
-          console.warn('Initial cloud sync error:', e);
-        } finally {
-          loginOverlay.classList.add('hidden');
-          showDashboard(); // Reveal dashboard
-          isSigningIn = false;
-          setTimeout(() => {
-            loginOverlay.style.display = 'none'; // Hide completely
-            loginBox.innerHTML = originalContent;
-            bindLoginOverlayButtons();
-          }, 500);
-        }
-      } else {
-        // Just hide the overlay instantly if already logged in on startup
-        loginOverlay.classList.add('hidden');
-        loginOverlay.style.display = 'none'; // Hide completely
-        showDashboard(); // Reveal dashboard
-      }
+    if (lastSyncEl) {
+      lastSyncEl.textContent = 'Real-time Terhubung';
     }
   } else {
-    disconnectState.style.display = 'none'; // Hide disconnect details
+    disconnectState.style.display = 'block'; // Show login/connect option when not connected
     connectedState.style.display = 'none';
     syncControls.style.display = 'none';
-
-    const userMode = localStorage.getItem('user_mode');
-
-    if (userMode === 'google') {
-      // Pengguna sebelumnya memilih Google — coba reconnect otomatis, JANGAN tampilkan login screen
-      // Token mungkin kedaluwarsa, coba init ulang di background
-      if (loginOverlay) {
-        // Pastikan login overlay tetap tersembunyi
-        loginOverlay.classList.add('hidden');
-        loginOverlay.style.display = 'none';
-      }
-      showDashboard();
-      // Coba reconnect diam-diam jika GIS library sudah siap
-      if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
-        try {
-          googleSync.init((status) => {
-            if (status && status.connected) {
-              updateGoogleSyncUI();
-            }
-          });
-        } catch (e) {
-          console.warn('Silent reconnect failed:', e);
-        }
-      }
-    } else if (userMode === 'guest') {
-      // Mode tamu aktif, sembunyikan overlay
-      if (loginOverlay) {
-        loginOverlay.classList.add('hidden');
-        loginOverlay.style.display = 'none';
-      }
-    } else {
-      // Pengguna baru atau belum pernah memilih — tampilkan login screen
-      if (loginOverlay && loginOverlay.classList.contains('hidden')) {
-        loginOverlay.style.display = 'flex';
-        setTimeout(() => {
-          loginOverlay.classList.remove('hidden');
-        }, 50);
-      }
+    
+    if (lastSyncEl) {
+      lastSyncEl.textContent = 'Tidak tersambung';
     }
   }
-
-  // Last Sync display formatting
-  const lastSyncTime = localStorage.getItem('google_last_sync_time');
-  if (lastSyncTime) {
-    const date = new Date(lastSyncTime);
-    lastSyncEl.textContent = date.toLocaleString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  } else {
-    lastSyncEl.textContent = 'Belum pernah';
-  }
-
-  // Update auto sync checkbox
-  if (autoSyncToggle) {
-    autoSyncToggle.checked = googleSync.isSyncEnabled();
-  }
 }
-

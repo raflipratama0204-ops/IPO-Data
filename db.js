@@ -11,53 +11,149 @@
     debts: []
   };
 
-  let memoryStorage = null;
+  let localCache = defaultDB;
+  let unsubscribeListeners = [];
 
   // Initialize database
   function initDB() {
     try {
-      if (!localStorage.getItem(DB_KEY)) {
-        localStorage.setItem(DB_KEY, JSON.stringify(defaultDB));
+      // Inisialisasi Firebase jika config tersedia
+      if (typeof firebaseConfig !== 'undefined' && firebase.apps.length === 0) {
+        firebase.initializeApp(firebaseConfig);
+        
+        // Aktifkan penyimpanan offline Firestore
+        firebase.firestore().enablePersistence().catch(err => {
+          if (err.code === 'failed-precondition') {
+            console.warn('Multiple tabs open, Firestore persistence can only be enabled in one tab.');
+          } else if (err.code === 'unimplemented') {
+            console.warn('Browser does not support Firestore offline persistence.');
+          }
+        });
+      }
+
+      // Load data lokal sebagai cache awal/offline
+      const localData = localStorage.getItem(DB_KEY);
+      if (localData) {
+        localCache = JSON.parse(localData);
+      } else {
+        localCache = defaultDB;
       }
     } catch (e) {
-      console.warn('localStorage is not available, falling back to memoryStorage.', e);
-      if (!memoryStorage) {
-        memoryStorage = JSON.stringify(defaultDB);
-      }
+      console.warn('localStorage is not available, falling back to defaultDB.', e);
+      localCache = defaultDB;
     }
+
+    // Pastikan semua array tersedia
+    if (!localCache.nominees) localCache.nominees = [];
+    if (!localCache.stocks) localCache.stocks = [];
+    if (!localCache.orders) localCache.orders = [];
+    if (!localCache.transfers) localCache.transfers = [];
+    if (!localCache.debts) localCache.debts = [];
+  }
+
+  // Bind real-time Firestore sync
+  function bindRealtimeSync(userId, onUpdateCallback) {
+    // Putuskan listener sebelumnya jika ada
+    unsubscribeListeners.forEach(unsub => unsub());
+    unsubscribeListeners = [];
+
+    const dbRef = firebase.firestore();
+
+    const syncCollection = (collectionName) => {
+      const unsub = dbRef.collection(`users/${userId}/${collectionName}`).onSnapshot(snapshot => {
+        localCache[collectionName] = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        // Simpan ke offline cache lokal
+        saveLocalCache();
+        
+        // Segarkan antarmuka/UI
+        if (typeof onUpdateCallback === 'function') {
+          onUpdateCallback();
+        }
+      }, err => {
+        console.warn(`Firestore sync error for ${collectionName}:`, err);
+      });
+      unsubscribeListeners.push(unsub);
+    };
+
+    // Sinkronkan kelima tabel utama secara real-time
+    syncCollection('nominees');
+    syncCollection('stocks');
+    syncCollection('orders');
+    syncCollection('transfers');
+    syncCollection('debts');
   }
 
   // Get the entire database object
   function getDB() {
-    initDB();
+    if (!localCache) initDB();
+    return localCache;
+  }
+
+  // Save local cache helper
+  function saveLocalCache() {
     try {
-      const db = JSON.parse(localStorage.getItem(DB_KEY)) || defaultDB;
-      if (!db.debts) db.debts = [];
-      return db;
+      localStorage.setItem(DB_KEY, JSON.stringify(localCache));
     } catch (e) {
-      console.error('Error parsing localStorage, falling back to memoryStorage', e);
-      try {
-        const db = JSON.parse(memoryStorage) || defaultDB;
-        if (!db.debts) db.debts = [];
-        return db;
-      } catch (err) {
-        return defaultDB;
-      }
+      console.warn('Failed to save local cache to localStorage.', e);
     }
   }
 
-  // Save database
+  // Save database (used for bulk imports or demo data restores)
   function saveDB(data) {
-    try {
-      localStorage.setItem(DB_KEY, JSON.stringify(data));
-    } catch (e) {
-      console.warn('Failed to save to localStorage, saving to memoryStorage instead.', e);
-      memoryStorage = JSON.stringify(data);
+    localCache = data;
+    saveLocalCache();
+
+    // Jalankan sinkronisasi massal (bulk write) ke Firestore jika login
+    const user = firebase.auth().currentUser;
+    if (user) {
+      const dbRef = firebase.firestore();
+      
+      const uploadCollection = async (collectionName, items) => {
+        const batch = dbRef.batch();
+        
+        // Hapus data lama agar sesuai dengan database baru
+        const existingDocs = await dbRef.collection(`users/${user.uid}/${collectionName}`).get();
+        existingDocs.forEach(doc => {
+          batch.delete(doc.ref);
+        });
+
+        // Tulis data baru
+        items.forEach(item => {
+          const docRef = dbRef.collection(`users/${user.uid}/${collectionName}`).doc(item.id);
+          batch.set(docRef, item);
+        });
+
+        await batch.commit();
+      };
+
+      Promise.all([
+        uploadCollection('nominees', data.nominees || []),
+        uploadCollection('stocks', data.stocks || []),
+        uploadCollection('orders', data.orders || []),
+        uploadCollection('transfers', data.transfers || []),
+        uploadCollection('debts', data.debts || [])
+      ]).catch(e => {
+        console.error("Firebase bulk upload error:", e);
+      });
     }
-    
-    // Auto-sync to Google Drive if connected and active
-    if (global.googleSync && typeof global.googleSync.autoUpload === 'function') {
-      global.googleSync.autoUpload(data);
+  }
+
+  // Write a single document change to Firestore in the background
+  function firestoreWrite(collectionName, docId, data, isDelete = false) {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    const dbRef = firebase.firestore();
+    const docRef = dbRef.collection(`users/${user.uid}/${collectionName}`).doc(docId);
+
+    if (isDelete) {
+      docRef.delete().catch(e => console.error(`Firestore delete error on ${collectionName}/${docId}:`, e));
+    } else {
+      docRef.set(data).catch(e => console.error(`Firestore set error on ${collectionName}/${docId}:`, e));
     }
   }
 
@@ -90,7 +186,8 @@
       createdAt: new Date().toISOString()
     };
     db.nominees.push(newNominee);
-    saveDB(db);
+    saveLocalCache();
+    firestoreWrite('nominees', newNominee.id, newNominee);
     return newNominee;
   }
 
@@ -100,7 +197,8 @@
     if (index !== -1) {
       if (updatedData.profitSharePct !== undefined) updatedData.profitSharePct = parseFloat(updatedData.profitSharePct);
       db.nominees[index] = { ...db.nominees[index], ...updatedData };
-      saveDB(db);
+      saveLocalCache();
+      firestoreWrite('nominees', id, db.nominees[index]);
       return db.nominees[index];
     }
     return null;
@@ -108,10 +206,22 @@
 
   function deleteNominee(id) {
     const db = getDB();
+    
+    // Hapus data nominee dari Firestore
+    firestoreWrite('nominees', id, null, true);
+    
+    // Cari dan hapus semua pesanan & transaksi terkait di Firestore
+    const orderIdsToDelete = db.orders.filter(o => o.nomineeId === id).map(o => o.id);
+    orderIdsToDelete.forEach(orderId => firestoreWrite('orders', orderId, null, true));
+    
+    const transferIdsToDelete = db.transfers.filter(t => t.nomineeId === id).map(t => t.id);
+    transferIdsToDelete.forEach(transferId => firestoreWrite('transfers', transferId, null, true));
+
+    // Perbarui cache lokal
     db.nominees = db.nominees.filter(n => n.id !== id);
     db.orders = db.orders.filter(o => o.nomineeId !== id);
     db.transfers = db.transfers.filter(t => t.nomineeId !== id);
-    saveDB(db);
+    saveLocalCache();
   }
 
   // ================= STOCKS CRUD =================
@@ -133,7 +243,8 @@
       createdAt: new Date().toISOString()
     };
     db.stocks.push(newStock);
-    saveDB(db);
+    saveLocalCache();
+    firestoreWrite('stocks', newStock.id, newStock);
     return newStock;
   }
 
@@ -143,7 +254,8 @@
     if (index !== -1) {
       if (updatedData.ipoPrice !== undefined) updatedData.ipoPrice = parseCurrency(updatedData.ipoPrice);
       db.stocks[index] = { ...db.stocks[index], ...updatedData };
-      saveDB(db);
+      saveLocalCache();
+      firestoreWrite('stocks', id, db.stocks[index]);
       return db.stocks[index];
     }
     return null;
@@ -151,9 +263,15 @@
 
   function deleteStock(id) {
     const db = getDB();
+    
+    firestoreWrite('stocks', id, null, true);
+    
+    const orderIdsToDelete = db.orders.filter(o => o.stockId === id).map(o => o.id);
+    orderIdsToDelete.forEach(orderId => firestoreWrite('orders', orderId, null, true));
+    
     db.stocks = db.stocks.filter(s => s.id !== id);
     db.orders = db.orders.filter(o => o.stockId !== id);
-    saveDB(db);
+    saveLocalCache();
   }
 
   // ================= ORDERS CRUD =================
@@ -169,7 +287,13 @@
     if (changed) {
       const db = getDB();
       db.orders = orders;
-      saveDB(db);
+      saveLocalCache();
+      // Perbarui juga data status di Firestore
+      orders.forEach(o => {
+        if (o.status === 'not_allotted') {
+          firestoreWrite('orders', o.id, o);
+        }
+      });
     }
     return orders;
   }
@@ -195,7 +319,8 @@
       createdAt: new Date().toISOString()
     };
     db.orders.push(newOrder);
-    saveDB(db);
+    saveLocalCache();
+    firestoreWrite('orders', newOrder.id, newOrder);
     return newOrder;
   }
 
@@ -214,7 +339,8 @@
       if (updatedData.sellReturned !== undefined) updatedData.sellReturned = parseCurrency(updatedData.sellReturned);
       
       db.orders[index] = { ...db.orders[index], ...updatedData };
-      saveDB(db);
+      saveLocalCache();
+      firestoreWrite('orders', id, db.orders[index]);
       return db.orders[index];
     }
     return null;
@@ -223,7 +349,8 @@
   function deleteOrder(id) {
     const db = getDB();
     db.orders = db.orders.filter(o => o.id !== id);
-    saveDB(db);
+    saveLocalCache();
+    firestoreWrite('orders', id, null, true);
   }
 
   // ================= TRANSFERS CRUD =================
@@ -243,7 +370,8 @@
       createdAt: new Date().toISOString()
     };
     db.transfers.push(newTransfer);
-    saveDB(db);
+    saveLocalCache();
+    firestoreWrite('transfers', newTransfer.id, newTransfer);
     return newTransfer;
   }
 
@@ -253,7 +381,8 @@
     if (index !== -1) {
       if (updatedData.amount !== undefined) updatedData.amount = parseCurrency(updatedData.amount);
       db.transfers[index] = { ...db.transfers[index], ...updatedData };
-      saveDB(db);
+      saveLocalCache();
+      firestoreWrite('transfers', id, db.transfers[index]);
       return db.transfers[index];
     }
     return null;
@@ -262,7 +391,8 @@
   function deleteTransfer(id) {
     const db = getDB();
     db.transfers = db.transfers.filter(t => t.id !== id);
-    saveDB(db);
+    saveLocalCache();
+    firestoreWrite('transfers', id, null, true);
   }
 
   // ================= DEBTS CRUD =================
@@ -282,7 +412,8 @@
       createdAt: new Date().toISOString()
     };
     db.debts.push(newDebt);
-    saveDB(db);
+    saveLocalCache();
+    firestoreWrite('debts', newDebt.id, newDebt);
     return newDebt;
   }
 
@@ -293,7 +424,8 @@
       if (updatedData.amount !== undefined) updatedData.amount = parseCurrency(updatedData.amount);
       if (updatedData.paidAmount !== undefined) updatedData.paidAmount = parseCurrency(updatedData.paidAmount);
       db.debts[index] = { ...db.debts[index], ...updatedData };
-      saveDB(db);
+      saveLocalCache();
+      firestoreWrite('debts', id, db.debts[index]);
       return db.debts[index];
     }
     return null;
@@ -302,7 +434,8 @@
   function deleteDebt(id) {
     const db = getDB();
     db.debts = db.debts.filter(d => d.id !== id);
-    saveDB(db);
+    saveLocalCache();
+    firestoreWrite('debts', id, null, true);
   }
 
   // ================= FINANCIAL COMPUTATIONS =================
@@ -709,6 +842,7 @@
   // Expose to global scope as a namespace object
   global.db = {
     initDB,
+    bindRealtimeSync,
     getDB,
     saveDB,
     getNominees,

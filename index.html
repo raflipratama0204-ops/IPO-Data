@@ -7,7 +7,7 @@
   <title>IPO Account Hub - Database Portofolio Akun</title>
   <!-- Google Fonts & FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css?v=3.7">
+  <link rel="stylesheet" href="styles.css?v=3.10">
   
   <!-- Mobile Home Screen (Add to Home Screen) Icons & Settings -->
   <link rel="icon" type="image/png" href="Logo IPO Tracker.png">
@@ -25,6 +25,10 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- html2canvas for capturing DOM element as Image -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Google Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <!-- Instantly apply light theme if saved to prevent flashing -->
@@ -1113,13 +1117,13 @@
         document.body.appendChild(script);
       }
       // Memuat db.js -> translations.js -> google-sync.js -> ui-render.js -> app.js
-      loadScript('js/db.js?v=3.7', function(dbSuccess) {
-        loadScript('js/translations.js?v=3.7', function(transSuccess) {
-          loadScript('js/google-sync.js?v=3.7', function(syncSuccess) {
-            loadScript('js/ui-render.js?v=3.7', function(uiSuccess) {
-              loadScript('js/app.js?v=3.7', function(appSuccess) {
-                // Cek apakah database, terjemahan, renderer, googleSync, dan fungsi utama berhasil dimuat
-                if (typeof db === 'undefined' || typeof UI_TRANSLATIONS === 'undefined' || typeof renderDashboard === 'undefined' || typeof googleSync === 'undefined' || typeof refreshAll === 'undefined') {
+      loadScript('js/firebase-config.js?v=3.10', function(configSuccess) {
+        loadScript('js/db.js?v=3.10', function(dbSuccess) {
+          loadScript('js/translations.js?v=3.10', function(transSuccess) {
+            loadScript('js/ui-render.js?v=3.10', function(uiSuccess) {
+              loadScript('js/app.js?v=3.10', function(appSuccess) {
+                // Cek apakah database, terjemahan, renderer, dan fungsi utama berhasil dimuat
+                if (typeof db === 'undefined' || typeof UI_TRANSLATIONS === 'undefined' || typeof renderDashboard === 'undefined' || typeof refreshAll === 'undefined') {
                   const errDiv = document.createElement('div');
                   errDiv.style.position = 'fixed';
                   errDiv.style.top = '0';
@@ -1133,14 +1137,14 @@
                   errDiv.style.fontFamily = 'sans-serif';
                   errDiv.style.textAlign = 'center';
                   errDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
-                  errDiv.innerHTML = '<strong>PENTING:</strong> Berkas logika (<code>db.js</code>, <code>translations.js</code>, <code>google-sync.js</code>, <code>ui-render.js</code>, atau <code>app.js</code>) gagal dimuat! Pastikan berkas-berkas tersebut sudah diunggah ke hosting Anda.';
+                  errDiv.innerHTML = '<strong>PENTING:</strong> Berkas logika (<code>db.js</code>, <code>translations.js</code>, <code>ui-render.js</code>, atau <code>app.js</code>) gagal dimuat! Pastikan berkas-berkas tersebut sudah diunggah ke hosting Anda.';
                   document.body.appendChild(errDiv);
                 }
-              }, 'app.js?v=3.7');
-            }, 'ui-render.js?v=3.7');
-          }, 'google-sync.js?v=3.7');
-        }, 'translations.js?v=3.7');
-      }, 'db.js?v=3.7');
+              }, 'app.js?v=3.10');
+            }, 'ui-render.js?v=3.10');
+          }, 'translations.js?v=3.10');
+        }, 'db.js?v=3.10');
+      }, 'firebase-config.js?v=3.10');
     })();
   </script>
 
