@@ -7,7 +7,7 @@
   <title>IPO Account Hub - Database Portofolio Akun</title>
   <!-- Google Fonts & FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css?v=3.11">
+  <link rel="stylesheet" href="styles.css?v=3.12">
   
   <!-- Mobile Home Screen (Add to Home Screen) Icons & Settings -->
   <link rel="icon" type="image/png" href="Logo IPO Tracker.png">
@@ -572,43 +572,14 @@
 
             <!-- Sync Controls -->
             <div id="google-sync-controls" style="display: none; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 1.25rem;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
-                <div>
-                  <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;" id="auto-sync-title">Sinkronisasi Otomatis</h4>
-                  <p class="kpi-subtext" style="margin: 0; font-size: 0.75rem;" id="auto-sync-desc">Unggah perubahan database secara otomatis ke Google Drive di latar belakang.</p>
-                </div>
-                <label class="switch">
-                  <input type="checkbox" id="google-auto-sync-toggle">
-                  <span class="slider"></span>
-                </label>
+              <div style="background: rgba(16, 185, 129, 0.03); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; padding: 1rem; text-align: center;">
+                <p style="margin: 0 0 0.5rem 0; font-size: 0.88rem; font-weight: 700; color: #10b981; display: inline-flex; align-items: center; gap: 0.5rem; justify-content: center;">
+                  <i class="fa-solid fa-circle-check"></i> Status Koneksi: Terhubung
+                </p>
+                <p class="kpi-subtext" style="margin: 0; font-size: 0.75rem; color: #94a3b8; line-height: 1.4;">
+                  Database online Anda tersinkronisasi secara otomatis dengan server Google Firebase. Semua perubahan data akan ter-update secara instan di seluruh HP dan komputer Anda.
+                </p>
               </div>
-
-              <div style="background: rgba(0, 242, 254, 0.02); border: 1px solid var(--glass-border); border-radius: 8px; padding: 0.85rem; margin-bottom: 1.25rem;">
-                <p style="margin: 0 0 0.5rem 0; font-size: 0.85rem; font-weight: 600;"><i class="fa-solid fa-circle-info text-primary"></i> <span id="cloud-status-title">Status Data Cloud:</span></p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; font-size: 0.8rem;">
-                  <div>
-                    <span class="kpi-subtext" id="last-sync-label">Terakhir Sinkronisasi:</span>
-                    <div id="google-last-sync" style="font-weight: 600; margin-top: 0.15rem;">Belum pernah</div>
-                  </div>
-                  <div>
-                    <span class="kpi-subtext" id="file-name-label">Nama Berkas di Drive:</span>
-                    <div style="font-weight: 600; margin-top: 0.15rem; font-family: monospace;">ipo_account_db.json</div>
-                  </div>
-                </div>
-              </div>
-
-              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <button class="btn btn-secondary" id="btn-google-download" style="flex: 1; min-width: 150px; justify-content: center; font-size: 0.8rem; padding: 0.5rem 1rem;">
-                  <i class="fa-solid fa-cloud-arrow-down" style="color: var(--secondary);"></i> <span id="download-btn-text">Unduh dari Cloud</span>
-                </button>
-                <button class="btn btn-primary" id="btn-google-upload" style="flex: 1; min-width: 150px; justify-content: center; font-size: 0.8rem; padding: 0.5rem 1rem;">
-                  <i class="fa-solid fa-cloud-arrow-up"></i> <span id="upload-btn-text">Unggah ke Cloud</span>
-                </button>
-              </div>
-              
-              <p class="kpi-subtext text-center mt-3" style="font-size: 0.72rem; line-height: 1.4;" id="download-warn-text">
-                <strong>Peringatan Unduh:</strong> Mengunduh dari Cloud akan menimpa seluruh data lokal saat ini. Harap lakukan ekspor backup manual jika ragu.
-              </p>
             </div>
           </div>
 
@@ -1134,11 +1105,11 @@
         document.body.appendChild(script);
       }
       // Memuat db.js -> translations.js -> google-sync.js -> ui-render.js -> app.js
-      loadScript('js/firebase-config.js?v=3.11', function(configSuccess) {
-        loadScript('js/db.js?v=3.11', function(dbSuccess) {
-          loadScript('js/translations.js?v=3.11', function(transSuccess) {
-            loadScript('js/ui-render.js?v=3.11', function(uiSuccess) {
-              loadScript('js/app.js?v=3.11', function(appSuccess) {
+      loadScript('js/firebase-config.js?v=3.12', function(configSuccess) {
+        loadScript('js/db.js?v=3.12', function(dbSuccess) {
+          loadScript('js/translations.js?v=3.12', function(transSuccess) {
+            loadScript('js/ui-render.js?v=3.12', function(uiSuccess) {
+              loadScript('js/app.js?v=3.12', function(appSuccess) {
                 // Cek apakah database, terjemahan, renderer, dan fungsi utama berhasil dimuat
                 if (typeof db === 'undefined' || typeof UI_TRANSLATIONS === 'undefined' || typeof renderDashboard === 'undefined' || typeof refreshAll === 'undefined') {
                   const errDiv = document.createElement('div');
@@ -1157,11 +1128,11 @@
                   errDiv.innerHTML = '<strong>PENTING:</strong> Berkas logika (<code>db.js</code>, <code>translations.js</code>, <code>ui-render.js</code>, atau <code>app.js</code>) gagal dimuat! Pastikan berkas-berkas tersebut sudah diunggah ke hosting Anda.';
                   document.body.appendChild(errDiv);
                 }
-              }, 'app.js?v=3.11');
-            }, 'ui-render.js?v=3.11');
-          }, 'translations.js?v=3.11');
-        }, 'db.js?v=3.11');
-      }, 'firebase-config.js?v=3.11');
+              }, 'app.js?v=3.12');
+            }, 'ui-render.js?v=3.12');
+          }, 'translations.js?v=3.12');
+        }, 'db.js?v=3.12');
+      }, 'firebase-config.js?v=3.12');
     })();
   </script>
 
