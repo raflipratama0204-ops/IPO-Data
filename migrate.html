@@ -76,6 +76,12 @@
       Gunakan tombol di bawah ini untuk mengunduh berkas cadangan <strong>ipo_account_db.json</strong> dari folder tersembunyi tersebut ke folder Downloads laptop Anda.
     </p>
 
+    <!-- Client ID Input for transparency and editing -->
+    <div style="margin-bottom: 1.5rem; text-align: left;">
+      <label for="client-id-input" style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.5rem; font-weight: 600;">Google Client ID:</label>
+      <input type="text" id="client-id-input" style="width: 100%; padding: 0.6rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #fff; font-size: 0.8rem; box-sizing: border-box;" placeholder="Masukkan Google Client ID Anda jika ada...">
+    </div>
+
     <button class="btn" id="btn-migrate">
       Hubungkan Google Drive & Unduh File
     </button>
@@ -84,18 +90,31 @@
   </div>
 
   <script>
-    const CLIENT_ID = '409883088386-ar3ej7spjkl2t0hglmopa9fotejh1nt6.apps.googleusercontent.com';
+    const savedClientId = localStorage.getItem('google_client_id');
+    const defaultClientId = '409883088386-ar3ej7spjkl2t0hglmopa9fotejh1nt6.apps.googleusercontent.com';
+    
+    // Set initial value in input field
+    const clientIdInput = document.getElementById('client-id-input');
+    clientIdInput.value = savedClientId || defaultClientId;
+
     const FILE_NAME = 'ipo_account_db.json';
     const btn = document.getElementById('btn-migrate');
     const statusText = document.getElementById('status-text');
 
     btn.addEventListener('click', () => {
+      const activeClientId = clientIdInput.value.trim();
+      if (!activeClientId) {
+        statusText.textContent = 'Harap isi Google Client ID terlebih dahulu.';
+        statusText.className = 'status';
+        return;
+      }
+
       statusText.textContent = 'Menghubungkan ke Google...';
       statusText.className = 'status';
 
       try {
         const client = google.accounts.oauth2.initTokenClient({
-          client_id: CLIENT_ID,
+          client_id: activeClientId,
           scope: 'https://www.googleapis.com/auth/drive.appdata',
           callback: async (response) => {
             if (response.error) {
